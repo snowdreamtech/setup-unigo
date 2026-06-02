@@ -48,7 +48,10 @@ type InstallMethod = 'npm' | 'pip' | 'release' | 'go'
  */
 export async function run(): Promise<void> {
   try {
-    const requestedVersion = core.getInput('unirtm-version').trim()
+    const requestedVersion = core
+      .getInput('unirtm-version')
+      .trim()
+      .replace(/^[vV]/, '')
     const requestedMethod = core.getInput('install_method').trim() as
       | InstallMethod
       | 'auto'
