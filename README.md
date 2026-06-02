@@ -32,7 +32,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      version: '0.0.1'
+      unirtm-version: '0.0.1'
 ```
 
 ### Force a specific install method
@@ -61,7 +61,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      version: '0.0.1'
+      unirtm-version: '0.0.1'
       install: true
       install_args: 'node python'
       cache: true
@@ -83,7 +83,7 @@ steps:
 
 | Input              | Required | Default               | Description                                                               |
 | ------------------ | -------- | --------------------- | ------------------------------------------------------------------------- |
-| `version`          | No       | `""` (latest)         | The unirtm version to install (e.g. `0.0.1`)                              |
+| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.0.1`)                              |
 | `install`          | No       | `false`               | Run `unirtm install` after setup                                          |
 | `install_args`     | No       | `""`                  | Arguments passed to `unirtm install` (e.g. `"node python"`)               |
 | `github_token`     | No       | `${{ github.token }}` | GitHub token for API auth and rate limit avoidance                        |
@@ -148,7 +148,7 @@ When using a custom `cache_key`, the following [Handlebars](https://handlebarsjs
 
 | Variable                | Description                                                 |
 | ----------------------- | ----------------------------------------------------------- |
-| `{{version}}`           | The unirtm version (from the `version` input)               |
+| `{{version}}`           | The unirtm version (from the `unirtm-version` input)        |
 | `{{cache_key_prefix}}`  | The cache key prefix (from `cache_key_prefix` input)        |
 | `{{platform}}`          | Target platform + runner image (e.g. `linux-x64-ubuntu24`)  |
 | `{{file_hash}}`         | Hash of unirtm config files (`.unirtm.toml`, `unirtm.lock`) |

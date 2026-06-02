@@ -6,7 +6,7 @@ branding:
   color: 'blue'
 
 inputs:
-  version:
+  unirtm-version:
     required: false
     default: ''
     description: >-

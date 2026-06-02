@@ -71692,7 +71692,7 @@ var NPM_PACKAGE = "@snowdreamtech/unirtm";
 var GO_MODULE = "github.com/snowdreamtech/unirtm";
 async function run() {
   try {
-    const requestedVersion = getInput("version").trim();
+    const requestedVersion = getInput("unirtm-version").trim();
     const requestedMethod = getInput("install_method").trim();
     const method = requestedMethod === "auto" ? await detectInstallMethod() : requestedMethod;
     info(`Using installation method: ${method}`);
