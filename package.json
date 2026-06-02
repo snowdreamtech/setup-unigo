@@ -93,6 +93,7 @@
     "ts-jest": "29.4.11",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1",
+    "jiti": "2.7.0",
     "globals": "17.6.0",
     "@eslint/js": "10.0.1"
   },

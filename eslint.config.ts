@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const eslint = require('@eslint/js')
-const tseslint = require('typescript-eslint')
-const jestPlugin = require('eslint-plugin-jest')
-const globals = require('globals')
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
+// @ts-ignore
+import jestPlugin from 'eslint-plugin-jest'
+import globals from 'globals'
 
-module.exports = tseslint.config(
+export default tseslint.config(
   {
     ignores: ['dist/', 'node_modules/', 'coverage/']
   },
