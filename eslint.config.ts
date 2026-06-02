@@ -1,6 +1,6 @@
 import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
-// @ts-ignore
+// @ts-expect-error
 import jestPlugin from 'eslint-plugin-jest'
 import globals from 'globals'
 
