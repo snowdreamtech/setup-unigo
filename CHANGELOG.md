@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.4...v0.3.0) (2026-06-02)
+
+
+### Features
+
+* rename version input to unirtm-version to avoid collisions ([3f7d925](https://github.com/snowdreamtech/setup-unirtm/commit/3f7d92577c2da1c2b2f4739a69b0d8a369226834))
+
 ## [0.2.4](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.3...v0.2.4) (2026-06-02)
 
 
