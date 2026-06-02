@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.4](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.3...v0.2.4) (2026-06-02)
+
+
+### Bug Fixes
+
+* add description to ts-expect-error ([c97d35c](https://github.com/snowdreamtech/setup-unirtm/commit/c97d35c504297f776ec979bc13294b13a6eb980c))
+* force release to include recent dependency and lint updates ([cac74e6](https://github.com/snowdreamtech/setup-unirtm/commit/cac74e608646aaee71c6c8907ed92214de391ad8))
+* pin jiti version explicitly ([84d67ce](https://github.com/snowdreamtech/setup-unirtm/commit/84d67ce6e07f2c730cdc4a8f6967d79802fd5748))
+* replace ts-ignore with ts-expect-error to satisfy linting ([dd15b75](https://github.com/snowdreamtech/setup-unirtm/commit/dd15b75fffc2d0cdafe0caa53bf601509f8e86b5))
+
 ## [0.2.3](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.2...v0.2.3) (2026-06-02)
 
 
