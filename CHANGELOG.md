@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.2...v0.2.3) (2026-06-02)
+
+
+### Bug Fixes
+
+* **cache:** resolve cache key and binary recovery issues ([7275ddf](https://github.com/snowdreamtech/setup-unirtm/commit/7275ddf7ebf71794f51a15c1a565216e827de2af))
+
 ## [0.2.2](https://github.com/snowdreamtech/setup-unirtm/compare/v0.2.1...v0.2.2) (2026-05-29)
 
 
