@@ -14,7 +14,10 @@ const UNIRTM_CONFIG_FILE_PATTERNS = [
   '**/.unirtm.toml',
   '**/unirtm.toml',
   '**/unirtm.lock',
-  '**/.unirtm.lock'
+  '**/.unirtm.lock',
+  '**/.mise.toml',
+  '**/mise.toml',
+  '**/.tool-versions'
 ]
 
 const DEFAULT_CACHE_KEY_TEMPLATE =
@@ -91,20 +94,17 @@ export async function run(): Promise<void> {
       core.setOutput('cache-hit', false)
     }
 
-    // If cache was restored, add binary dir to PATH and skip install
+    // Always install unirtm to ensure the binary is correctly placed and PATH is set
+    const installed = await installUnirtm(method, installVersion)
+    if (!installed) {
+      core.setFailed(
+        `Failed to install unirtm@${installVersion} via method "${method}"`
+      )
+      return
+    }
+
     if (cacheHit) {
-      const binDir = getInstallBinDir()
-      core.addPath(binDir)
-      core.info(`Cache hit — skipping installation, added ${binDir} to PATH`)
-    } else {
-      // Install unirtm
-      const installed = await installUnirtm(method, installVersion)
-      if (!installed) {
-        core.setFailed(
-          `Failed to install unirtm@${installVersion} via method "${method}"`
-        )
-        return
-      }
+      core.info('Cache hit — tools data restored')
     }
 
     // Verify installation
@@ -526,7 +526,6 @@ async function runUnirtmInstall(): Promise<void> {
 function getCachePaths(): string[] {
   const home = os.homedir()
   return [
-    path.join(home, '.local', 'bin'),
     path.join(home, '.local', 'share', 'unirtm'),
     path.join(home, 'Library', 'Application Support', 'unirtm'),
     path.join(
