@@ -76,6 +76,24 @@ describe('post.ts', () => {
     expect(cache.saveCache).not.toHaveBeenCalled()
   })
 
+  it('should skip caching if cache hit occurred', async () => {
+    ;(core.getState as jest.Mock).mockImplementation((name: string) => {
+      if (name === 'CACHE_RESULT') return 'some-cache-key'
+      if (name === 'CACHE_PATHS') return '["/tmp/cache"]'
+      if (name === 'PRIMARY_KEY') return 'test-key'
+      return ''
+    })
+    ;(core.getInput as jest.Mock).mockImplementation((name: string) => {
+      if (name === 'cache') return 'true'
+      if (name === 'cache_save') return 'true'
+      return ''
+    })
+
+    await post()
+    expect(core.info).toHaveBeenCalledWith(expect.stringContaining('not saving cache'))
+    expect(cache.saveCache).not.toHaveBeenCalled()
+  })
+
   it('should skip caching if no valid cache paths exist on disk', async () => {
     ;(fs.existsSync as jest.Mock).mockReturnValue(false)
 

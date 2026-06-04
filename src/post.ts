@@ -9,13 +9,19 @@ import * as fs from 'fs'
 export async function post(): Promise<void> {
   try {
     const shouldCache = core.getBooleanInput('cache')
+    const cacheHit = core.getState('CACHE_RESULT')
+    const primaryKey = core.getState('PRIMARY_KEY')
+    if (cacheHit && cacheHit !== 'false') {
+      core.info(`Cache was hit for key ${primaryKey}, not saving cache.`)
+      return
+    }
+
     const shouldSave = core.getBooleanInput('cache_save')
     if (!shouldCache || !shouldSave) {
       core.info('Cache save skipped (cache or cache_save is false)')
       return
     }
 
-    const primaryKey = core.getState('PRIMARY_KEY')
     const cachePathsJson = core.getState('CACHE_PATHS')
 
     if (!primaryKey || !cachePathsJson) {

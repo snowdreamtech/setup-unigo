@@ -267,6 +267,16 @@ describe('main.ts', () => {
         })
       })
 
+      it('should fail gracefully if go install fails', async () => {
+        ;(core.getInput as jest.Mock).mockImplementation((input) => input === 'install_method' ? 'go' : '')
+        ;(exec.exec as jest.Mock).mockImplementation(async (_cmd, _args) => {
+          if (_cmd === 'go') throw new Error('Go command failed network')
+          return 0
+        })
+        await run()
+        expect(core.warning).toHaveBeenCalledWith(expect.stringContaining('go install failed'))
+      })
+
       it('should install via go', async () => {
         process.env.GOPATH = '/fake/gopath'
         ;(exec.getExecOutput as jest.Mock).mockResolvedValue({ stdout: '1.2.3', exitCode: 0 })
@@ -339,6 +349,37 @@ describe('main.ts', () => {
         expect(curlCall[1].some(arg => typeof arg === 'string' && arg.includes('https://mirror.example.com/https://github.com'))).toBe(true)
       })
 
+      it('should retry download on non-zero exit code', async () => {
+        Object.defineProperty(process, 'platform', { value: 'linux' })
+        Object.defineProperty(process, 'arch', { value: 'x64' })
+        let curlAttempts = 0
+        ;(exec.exec as jest.Mock).mockImplementation(async (_cmd) => {
+          if (_cmd === 'curl') {
+            curlAttempts++
+            if (curlAttempts < 3) return 1
+            return 0
+          }
+          return 0
+        })
+        await run()
+        expect(curlAttempts).toBe(3)
+      }, 10000)
+
+      it('should recurse directories in findFile', async () => {
+        Object.defineProperty(process, 'platform', { value: 'linux' })
+        Object.defineProperty(process, 'arch', { value: 'x64' })
+        
+        ;(fs.promises.readdir as jest.Mock).mockResolvedValueOnce([
+          { name: 'subdir', isDirectory: () => true, isFile: () => false },
+        ] as never)
+        ;(fs.promises.readdir as jest.Mock).mockResolvedValueOnce([
+          { name: 'unirtm', isDirectory: () => false, isFile: () => true }
+        ] as never)
+        
+        await run()
+        expect(core.addPath).toHaveBeenCalled()
+      })
+
       it('should retry download on failure', async () => {
         Object.defineProperty(process, 'platform', { value: 'linux' })
         Object.defineProperty(process, 'arch', { value: 'x64' })
@@ -387,6 +428,15 @@ describe('main.ts', () => {
         return false
       })
       ;(exec.getExecOutput as jest.Mock).mockResolvedValue({ stdout: '1.0.0', exitCode: 0 })
+    })
+
+    it('should include install_args in cache key', async () => {
+      ;(core.getInput as jest.Mock).mockImplementation((input: string) => {
+        if (input === 'install_args') return 'tool1 -f tool2'
+        return 'auto'
+      })
+      await run()
+      expect(core.saveState).toHaveBeenCalled()
     })
 
     it('should restore cache and save state on miss', async () => {
@@ -494,6 +544,17 @@ describe('main.ts', () => {
       await expect(run()).resolves.toBeUndefined()
       expect(core.warning).toHaveBeenCalledWith(expect.stringContaining('Unsupported arch: mips'))
       expect(core.setFailed).toHaveBeenCalledWith(expect.stringContaining('Failed to install'))
+    })
+    
+    it('supports ia32 and arm architectures for release', async () => {
+      ;(core.getInput as jest.Mock).mockImplementation((input) => input === 'install_method' ? 'release' : '')
+      
+      Object.defineProperty(process, 'platform', { value: 'linux' })
+      Object.defineProperty(process, 'arch', { value: 'ia32' })
+      await expect(run()).resolves.toBeUndefined()
+      
+      Object.defineProperty(process, 'arch', { value: 'arm' })
+      await expect(run()).resolves.toBeUndefined()
     })
     
     it('detectInstallMethod isCommandAvailable on Windows', async () => {
