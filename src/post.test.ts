@@ -9,7 +9,15 @@ import { post } from './post'
 // Mock dependencies
 jest.mock('@actions/core')
 jest.mock('@actions/cache')
-jest.mock('fs')
+jest.mock('fs', () => {
+  return {
+    ...jest.requireActual('fs'),
+    promises: {
+      access: jest.fn()
+    },
+    existsSync: jest.fn()
+  }
+})
 
 describe('post.ts', () => {
   beforeEach(() => {

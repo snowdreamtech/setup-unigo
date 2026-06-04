@@ -22,7 +22,8 @@ jest.mock('fs', () => {
       mkdir: jest.fn(),
       copyFile: jest.fn(),
       rm: jest.fn(),
-      readdir: jest.fn()
+      readdir: jest.fn(),
+      access: jest.fn()
     },
     existsSync: jest.fn()
   }
