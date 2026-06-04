@@ -26,7 +26,7 @@
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
-    "ci-test": "npx jest",
+    "ci-test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
     "lint": "npx eslint .",
@@ -34,7 +34,7 @@
     "package:post": "npx -y esbuild src/post.ts --bundle --platform=node --target=node20 --outfile=dist/post.js",
     "package": "npm run package:index && npm run package:post",
     "package:watch": "npm run package -- --watch",
-    "test": "npx jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run package",
     "prepare": "husky"
   },
@@ -56,7 +56,18 @@
       "/dist/"
     ],
     "transform": {
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "isolatedModules": true
+        }
+      ]
+    },
+    "moduleNameMapper": {
+      "^@actions/core$": "<rootDir>/node_modules/@actions/core/lib/core.js",
+      "^@actions/exec$": "<rootDir>/node_modules/@actions/exec/lib/exec.js",
+      "^@actions/cache$": "<rootDir>/node_modules/@actions/cache/lib/cache.js",
+      "^@actions/glob$": "<rootDir>/node_modules/@actions/glob/lib/glob.js"
     },
     "coverageReporters": [
       "json-summary",
