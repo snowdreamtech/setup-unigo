@@ -63706,12 +63706,17 @@ var fs6 = __toESM(require("fs"));
 async function post() {
   try {
     const shouldCache = getBooleanInput("cache");
+    const cacheHit = getState("CACHE_RESULT");
+    const primaryKey = getState("PRIMARY_KEY");
+    if (cacheHit === "true") {
+      info(`Cache was hit for key ${primaryKey}, not saving cache.`);
+      return;
+    }
     const shouldSave = getBooleanInput("cache_save");
     if (!shouldCache || !shouldSave) {
       info("Cache save skipped (cache or cache_save is false)");
       return;
     }
-    const primaryKey = getState("PRIMARY_KEY");
     const cachePathsJson = getState("CACHE_PATHS");
     if (!primaryKey || !cachePathsJson) {
       info(

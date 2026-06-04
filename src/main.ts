@@ -566,17 +566,17 @@ async function restoreUnirtmCache(
   core.info(`Restore keys:\n  ${restoreKeys.join('\n  ')}`)
 
   const hitKey = await cache.restoreCache(cachePaths, primaryKey, restoreKeys)
-  const hit = Boolean(hitKey)
+  const isExactHit = hitKey === primaryKey
 
-  core.setOutput('cache-hit', hit)
-  if (hit) {
+  core.setOutput('cache-hit', isExactHit)
+  if (hitKey) {
     core.info(`Cache restored from key: ${hitKey}`)
   } else {
     core.info('No cache found, will install fresh')
   }
 
   core.endGroup()
-  return { primaryKey, hit }
+  return { primaryKey, hit: isExactHit }
 }
 
 /**
