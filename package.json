@@ -58,9 +58,7 @@
     "transform": {
       "^.+\\.ts$": [
         "ts-jest",
-        {
-          "isolatedModules": true
-        }
+        {}
       ]
     },
     "moduleNameMapper": {

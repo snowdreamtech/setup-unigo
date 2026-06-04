@@ -84,6 +84,7 @@ inputs:
         {{cache_key_prefix}}  - The cache key prefix
         {{platform}}          - Platform string (e.g. "linux-x64-ubuntu24")
         {{file_hash}}         - Hash of unirtm config files (.unirtm.toml, unirtm.lock)
+        {{unirtm_env}}        - Value of UNIRTM_ENV environment variable
         {{mise_env}}          - Value of MISE_ENV environment variable
         {{install_args_hash}} - SHA256 hash of sorted install args
         {{default}}           - The processed default cache key (for extension)

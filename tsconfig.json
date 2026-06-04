@@ -13,6 +13,7 @@
     "strict": true,
     "skipLibCheck": true,
     "newLine": "lf",
+    "isolatedModules": true,
     "types": ["node"]
   },
   "exclude": [
