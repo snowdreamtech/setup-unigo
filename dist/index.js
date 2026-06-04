@@ -71671,11 +71671,11 @@ function hashFiles3(patterns_1) {
 }
 
 // src/main.ts
-var crypto5 = __toESM(require("crypto"));
-var fs8 = __toESM(require("fs"));
-var os8 = __toESM(require("os"));
-var path14 = __toESM(require("path"));
-var Handlebars = __toESM(require_lib());
+var crypto5 = __toESM(require("crypto"), 1);
+var fs8 = __toESM(require("fs"), 1);
+var os8 = __toESM(require("os"), 1);
+var path14 = __toESM(require("path"), 1);
+var Handlebars = __toESM(require_lib(), 1);
 var UNIRTM_CONFIG_FILE_PATTERNS = [
   "**/.unirtm.toml",
   "**/unirtm.toml",

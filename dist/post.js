@@ -63702,7 +63702,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 }
 
 // src/post.ts
-var fs6 = __toESM(require("fs"));
+var fs6 = __toESM(require("fs"), 1);
 async function post() {
   try {
     const shouldCache = getBooleanInput("cache");

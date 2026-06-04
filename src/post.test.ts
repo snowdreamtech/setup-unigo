@@ -1,42 +1,43 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
 import * as core from '@actions/core'
 import * as cache from '@actions/cache'
 import * as fs from 'fs'
 import { post } from './post'
 
 // Mock dependencies
-jest.mock('@actions/core')
-jest.mock('@actions/cache')
-jest.mock('fs', () => {
+vi.mock('@actions/core')
+vi.mock('@actions/cache')
+vi.mock('fs', async importOriginal => {
+  const actual = await importOriginal()
   return {
-    ...jest.requireActual('fs'),
+    ...actual,
     promises: {
-      access: jest.fn()
+      access: vi.fn()
     },
-    existsSync: jest.fn()
+    existsSync: vi.fn()
   }
 })
 
 describe('post.ts', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // Default mock implementations to avoid unexpected behaviors
-    ;(core.getBooleanInput as jest.Mock).mockReturnValue(true)
-    ;(core.getState as jest.Mock).mockImplementation((key: string) => {
+    ;(core.getBooleanInput as Mock).mockReturnValue(true)
+    ;(core.getState as Mock).mockImplementation((key: string) => {
       if (key === 'PRIMARY_KEY') return 'test-key'
       if (key === 'CACHE_PATHS')
         return JSON.stringify(['/test/path1', '/test/path2'])
       return ''
     })
-    ;(fs.existsSync as jest.Mock).mockReturnValue(true)
-    ;(cache.saveCache as jest.Mock).mockResolvedValue(1)
+    ;(fs.existsSync as Mock).mockReturnValue(true)
+    ;(cache.saveCache as Mock).mockResolvedValue(1)
   })
 
   it('should skip caching if cache input is false', async () => {
-    ;(core.getBooleanInput as jest.Mock).mockImplementation((input: string) => {
+    ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
       if (input === 'cache') return false
       return true
     })
@@ -50,7 +51,7 @@ describe('post.ts', () => {
   })
 
   it('should skip caching if cache_save input is false', async () => {
-    ;(core.getBooleanInput as jest.Mock).mockImplementation((input: string) => {
+    ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
       if (input === 'cache_save') return false
       return true
     })
@@ -64,7 +65,7 @@ describe('post.ts', () => {
   })
 
   it('should skip caching if PRIMARY_KEY state is missing', async () => {
-    ;(core.getState as jest.Mock).mockImplementation((key: string) => {
+    ;(core.getState as Mock).mockImplementation((key: string) => {
       if (key === 'PRIMARY_KEY') return ''
       if (key === 'CACHE_PATHS') return JSON.stringify(['/test/path'])
       return ''
@@ -79,7 +80,7 @@ describe('post.ts', () => {
   })
 
   it('should handle invalid JSON in CACHE_PATHS state', async () => {
-    ;(core.getState as jest.Mock).mockImplementation((key: string) => {
+    ;(core.getState as Mock).mockImplementation((key: string) => {
       if (key === 'PRIMARY_KEY') return 'test-key'
       if (key === 'CACHE_PATHS') return 'invalid-json'
       return ''
@@ -94,13 +95,13 @@ describe('post.ts', () => {
   })
 
   it('should skip caching if cache hit occurred', async () => {
-    ;(core.getState as jest.Mock).mockImplementation((name: string) => {
+    ;(core.getState as Mock).mockImplementation((name: string) => {
       if (name === 'CACHE_RESULT') return 'true'
       if (name === 'CACHE_PATHS') return '["/tmp/cache"]'
       if (name === 'PRIMARY_KEY') return 'test-key'
       return ''
     })
-    ;(core.getInput as jest.Mock).mockImplementation((name: string) => {
+    ;(core.getInput as Mock).mockImplementation((name: string) => {
       if (name === 'cache') return 'true'
       if (name === 'cache_save') return 'true'
       return ''
@@ -114,7 +115,7 @@ describe('post.ts', () => {
   })
 
   it('should skip caching if no valid cache paths exist on disk', async () => {
-    ;(fs.existsSync as jest.Mock).mockReturnValue(false)
+    ;(fs.existsSync as Mock).mockReturnValue(false)
 
     await post()
 
@@ -138,7 +139,7 @@ describe('post.ts', () => {
   })
 
   it('should handle cache already existing (saveCache returns -1)', async () => {
-    ;(cache.saveCache as jest.Mock).mockResolvedValue(-1)
+    ;(cache.saveCache as Mock).mockResolvedValue(-1)
 
     await post()
 
@@ -150,7 +151,7 @@ describe('post.ts', () => {
 
   it('should not fail the workflow if an error occurs during cache save', async () => {
     const errorMsg = 'Network error'
-    ;(cache.saveCache as jest.Mock).mockRejectedValue(new Error(errorMsg))
+    ;(cache.saveCache as Mock).mockRejectedValue(new Error(errorMsg))
 
     // Should not throw
     await expect(post()).resolves.toBeUndefined()
