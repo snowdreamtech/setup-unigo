@@ -119,6 +119,7 @@ export async function run(): Promise<void> {
     if (cacheKey && core.getBooleanInput('cache_save')) {
       core.saveState('PRIMARY_KEY', cacheKey)
       core.saveState('CACHE_PATHS', JSON.stringify(getCachePaths()))
+      core.saveState('CACHE_RESULT', cacheHit ? 'true' : 'false')
     }
 
     // Run unirtm trust if requested

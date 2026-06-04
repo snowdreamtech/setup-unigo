@@ -78,7 +78,7 @@ describe('post.ts', () => {
 
   it('should skip caching if cache hit occurred', async () => {
     ;(core.getState as jest.Mock).mockImplementation((name: string) => {
-      if (name === 'CACHE_RESULT') return 'some-cache-key'
+      if (name === 'CACHE_RESULT') return 'true'
       if (name === 'CACHE_PATHS') return '["/tmp/cache"]'
       if (name === 'PRIMARY_KEY') return 'test-key'
       return ''

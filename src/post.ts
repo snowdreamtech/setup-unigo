@@ -11,7 +11,7 @@ export async function post(): Promise<void> {
     const shouldCache = core.getBooleanInput('cache')
     const cacheHit = core.getState('CACHE_RESULT')
     const primaryKey = core.getState('PRIMARY_KEY')
-    if (cacheHit && cacheHit !== 'false') {
+    if (cacheHit === 'true') {
       core.info(`Cache was hit for key ${primaryKey}, not saving cache.`)
       return
     }
