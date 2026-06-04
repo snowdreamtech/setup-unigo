@@ -23,6 +23,7 @@ const UNIRTM_CONFIG_FILE_PATTERNS = [
 const DEFAULT_CACHE_KEY_TEMPLATE =
   '{{cache_key_prefix}}-{{platform}}' +
   '{{#if version}}-{{version}}{{/if}}' +
+  '{{#if unirtm_env}}-{{unirtm_env}}{{/if}}' +
   '{{#if mise_env}}-{{mise_env}}{{/if}}' +
   '{{#if install_args_hash}}-{{install_args_hash}}{{/if}}' +
   '-{{#if file_hash}}{{file_hash}}{{else}}no-config{{/if}}'
@@ -615,6 +616,7 @@ async function processCacheKeyTemplate(
 ): Promise<string> {
   const installArgs = core.getInput('install_args')
   const cacheKeyPrefix = core.getInput('cache_key_prefix') || 'setup-unirtm-v1'
+  const unirtmEnv = process.env.UNIRTM_ENV?.replace(/,/g, '-') ?? ''
   const miseEnv = process.env.MISE_ENV?.replace(/,/g, '-') ?? ''
   const platform = `${getPlatformArch()}-${getRunnerImageId()}`
 
@@ -639,6 +641,7 @@ async function processCacheKeyTemplate(
     cache_key_prefix: cacheKeyPrefix,
     platform,
     file_hash: fileHash,
+    unirtm_env: unirtmEnv,
     mise_env: miseEnv,
     install_args_hash: installArgsHash
   }
