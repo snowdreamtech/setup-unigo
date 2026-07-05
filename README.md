@@ -32,7 +32,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      unirtm-version: '0.0.1'
+      unirtm-version: '0.4.2'
 ```
 
 ### Force a specific install method
@@ -61,7 +61,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      unirtm-version: '0.0.1'
+      unirtm-version: '0.4.2'
       install: true
       install_args: 'node python'
       cache: true
@@ -83,7 +83,7 @@ steps:
 
 | Input              | Required | Default               | Description                                                               |
 | ------------------ | -------- | --------------------- | ------------------------------------------------------------------------- |
-| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.0.1`)                              |
+| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.4.2`)                              |
 | `install`          | No       | `false`               | Run `unirtm install` after setup                                          |
 | `install_args`     | No       | `""`                  | Arguments passed to `unirtm install` (e.g. `"node python"`)               |
 | `github_token`     | No       | `${{ github.token }}` | GitHub token for API auth and rate limit avoidance                        |
