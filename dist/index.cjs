@@ -76328,11 +76328,6 @@ async function run() {
     const installedVersion = await verifyUnirtm();
     setOutput("unirtm-version", installedVersion);
     info(`unirtm ${installedVersion} is ready`);
-    if (cacheKey && getBooleanInput("cache_save")) {
-      saveState("PRIMARY_KEY", cacheKey);
-      saveState("CACHE_PATHS", JSON.stringify(getCachePaths()));
-      saveState("CACHE_RESULT", cacheHit ? "true" : "false");
-    }
     if (getBooleanInput("trust")) {
       await runUnirtmTrust();
     }
@@ -76344,6 +76339,11 @@ async function run() {
       } else {
         await runUnirtmInstall();
       }
+    }
+    if (cacheKey && getBooleanInput("cache_save")) {
+      saveState("PRIMARY_KEY", cacheKey);
+      saveState("CACHE_PATHS", JSON.stringify(getCachePaths()));
+      saveState("CACHE_RESULT", cacheHit ? "true" : "false");
     }
   } catch (err) {
     if (err instanceof Error) setFailed(err.message);
