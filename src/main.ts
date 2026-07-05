@@ -54,8 +54,7 @@ export async function run(): Promise<void> {
       .trim()
       .replace(/^[vV]/, '')
     const requestedMethod = core.getInput('install_method').trim() as
-      | InstallMethod
-      | 'auto'
+      InstallMethod | 'auto'
 
     // 1. Determine installation method
     const method: InstallMethod =
