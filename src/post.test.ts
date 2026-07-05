@@ -4,7 +4,7 @@ import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
 import * as core from '@actions/core'
 import * as cache from '@actions/cache'
 import * as fs from 'fs'
-import { post } from './post'
+import { post } from './post.js'
 
 // Mock dependencies
 vi.mock('@actions/core')
