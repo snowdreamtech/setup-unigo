@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as io from '@actions/io'
 import * as cache from '@actions/cache'
 import * as glob from '@actions/glob'
 import * as crypto from 'crypto'
@@ -224,16 +225,12 @@ async function detectInstallMethod(): Promise<InstallMethod> {
 
 /**
  * Check if a CLI command is available in PATH.
- * Cross-platform: uses `where` on Windows, `which` on Unix/macOS.
+ * Uses @actions/io to safely resolve executables across platforms.
  */
 async function isCommandAvailable(cmd: string): Promise<boolean> {
   try {
-    if (process.platform === 'win32') {
-      await exec.exec('where', [cmd], { silent: true, ignoreReturnCode: false })
-    } else {
-      await exec.exec('which', [cmd], { silent: true, ignoreReturnCode: false })
-    }
-    return true
+    const toolPath = await io.which(cmd, false)
+    return !!toolPath
   } catch {
     return false
   }

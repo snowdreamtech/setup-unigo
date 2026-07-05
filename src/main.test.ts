@@ -3,6 +3,7 @@
 import { describe, expect, it, beforeEach, afterAll, vi, Mock } from 'vitest'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as io from '@actions/io'
 import * as cache from '@actions/cache'
 import * as glob from '@actions/glob'
 import * as fs from 'fs'
@@ -14,6 +15,7 @@ import './post.js'
 // Mock dependencies
 vi.mock('@actions/core')
 vi.mock('@actions/exec')
+vi.mock('@actions/io')
 vi.mock('@actions/cache')
 vi.mock('@actions/glob')
 vi.mock('fs', async importOriginal => {
@@ -83,6 +85,10 @@ describe('main.ts', () => {
 
     // Mock exec and find commands
     ;(exec.exec as Mock).mockResolvedValue(0)
+    ;(io.which as Mock).mockImplementation(async cmd => {
+      if (cmd === 'npm') return '/usr/bin/npm'
+      throw new Error('not found')
+    })
     ;(exec.getExecOutput as Mock).mockImplementation(async (cmd, _args) => {
       if (cmd === 'curl') {
         return {
@@ -117,8 +123,12 @@ describe('main.ts', () => {
 
   describe('detectInstallMethod', () => {
     it('should detect npm if available', async () => {
-      ;(exec.exec as Mock).mockImplementation(async (cmd, args) => {
-        if (args && args.includes('npm')) return 0
+      ;(io.which as Mock).mockImplementation(async cmd => {
+        if (cmd === 'npm') return '/usr/bin/npm'
+        throw new Error('not found')
+      })
+      ;(exec.exec as Mock).mockImplementation(async (cmd, _args) => {
+        if (cmd === 'npm') return 0
         throw new Error('not found')
       })
 
@@ -135,10 +145,11 @@ describe('main.ts', () => {
     })
 
     it('should detect pip if pip is available and npm is not', async () => {
-      ;(exec.exec as Mock).mockImplementation(async (cmd, args) => {
-        if (cmd === 'which' && args && args.includes('pip')) return 0
-        if (cmd === 'which' && args && args.includes('npm'))
-          throw new Error('not found')
+      ;(io.which as Mock).mockImplementation(async cmd => {
+        if (cmd === 'pip') return '/usr/bin/pip'
+        throw new Error('not found')
+      })
+      ;(exec.exec as Mock).mockImplementation(async (cmd, _args) => {
         if (cmd === 'curl') return 0
         throw new Error('not found')
       })
@@ -153,9 +164,11 @@ describe('main.ts', () => {
     })
 
     it('should detect go if go is available and npm/pip are not', async () => {
-      ;(exec.exec as Mock).mockImplementation(async (cmd, args) => {
-        if (cmd === 'which' && args && args.includes('go')) return 0
-        if (cmd === 'which') throw new Error('not found')
+      ;(io.which as Mock).mockImplementation(async cmd => {
+        if (cmd === 'go') return '/usr/bin/go'
+        throw new Error('not found')
+      })
+      ;(exec.exec as Mock).mockImplementation(async (cmd, _args) => {
         if (cmd === 'go') return 0
         throw new Error('not found')
       })
@@ -169,8 +182,10 @@ describe('main.ts', () => {
     })
 
     it('should fallback to release if no tools available', async () => {
+      ;(io.which as Mock).mockImplementation(async () => {
+        throw new Error('not found')
+      })
       ;(exec.exec as Mock).mockImplementation(async (cmd, _args) => {
-        if (cmd === 'which' || cmd === 'where') throw new Error('not found')
         if (cmd === 'curl') return 0
         return 0
       })
@@ -763,17 +778,6 @@ describe('main.ts', () => {
 
       Object.defineProperty(process, 'arch', { value: 'arm' })
       await expect(run()).resolves.toBeUndefined()
-    })
-
-    it('detectInstallMethod isCommandAvailable on Windows', async () => {
-      Object.defineProperty(process, 'platform', { value: 'win32' })
-      ;(exec.exec as Mock).mockResolvedValue(0)
-      await run()
-      expect(exec.exec).toHaveBeenCalledWith(
-        'where',
-        expect.any(Array),
-        expect.any(Object)
-      )
     })
   })
 })

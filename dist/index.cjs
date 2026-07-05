@@ -76406,12 +76406,8 @@ async function detectInstallMethod() {
 }
 async function isCommandAvailable(cmd) {
   try {
-    if (process.platform === "win32") {
-      await exec("where", [cmd], { silent: true, ignoreReturnCode: false });
-    } else {
-      await exec("which", [cmd], { silent: true, ignoreReturnCode: false });
-    }
-    return true;
+    const toolPath = await which(cmd, false);
+    return !!toolPath;
   } catch {
     return false;
   }
