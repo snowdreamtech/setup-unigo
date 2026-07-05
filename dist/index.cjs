@@ -34359,6 +34359,7 @@ var Summary = class {
   }
 };
 var _summary = new Summary();
+var summary = _summary;
 
 // node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
@@ -76345,6 +76346,15 @@ async function run() {
       saveState("CACHE_PATHS", JSON.stringify(getCachePaths()));
       saveState("CACHE_RESULT", cacheHit ? "true" : "false");
     }
+    await summary.addHeading("UniRTM Setup Summary", 2).addTable([
+      [
+        { data: "Item", header: true },
+        { data: "Details", header: true }
+      ],
+      ["**UniRTM Version**", `v${installedVersion}`],
+      ["**Install Method**", `\`${method}\``],
+      ["**Cache Hit**", cacheHit ? "\u2705 Yes" : "\u274C No"]
+    ]).write();
   } catch (err) {
     if (err instanceof Error) setFailed(err.message);
     else throw err;

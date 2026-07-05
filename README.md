@@ -86,6 +86,7 @@ steps:
 | `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.4.2`)                              |
 | `install`          | No       | `false`               | Run `unirtm install` after setup                                          |
 | `install_args`     | No       | `""`                  | Arguments passed to `unirtm install` (e.g. `"node python"`)               |
+| `trust`            | No       | `false`               | Run `unirtm trust` after setting up unirtm                                |
 | `github_token`     | No       | `${{ github.token }}` | GitHub token for API auth and rate limit avoidance                        |
 | `github_proxy`     | No       | `""`                  | Proxy prefix for GitHub download URLs (also reads `GITHUB_PROXY` env var) |
 | `install_method`   | No       | `auto`                | Installation method: `auto` / `npm` / `pip` / `release` / `go`            |
@@ -152,6 +153,7 @@ When using a custom `cache_key`, the following [Handlebars](https://handlebarsjs
 | `{{cache_key_prefix}}`  | The cache key prefix (from `cache_key_prefix` input)        |
 | `{{platform}}`          | Target platform + runner image (e.g. `linux-x64-ubuntu24`)  |
 | `{{file_hash}}`         | Hash of unirtm config files (`.unirtm.toml`, `unirtm.lock`) |
+| `{{unirtm_env}}`        | Value of `UNIRTM_ENV` environment variable                  |
 | `{{mise_env}}`          | Value of `MISE_ENV` environment variable                    |
 | `{{install_args_hash}}` | SHA256 hash of sorted tools from `install_args`             |
 | `{{default}}`           | The computed default cache key (useful for extending)       |

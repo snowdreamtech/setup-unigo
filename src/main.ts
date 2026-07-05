@@ -138,6 +138,20 @@ export async function run(): Promise<void> {
       core.saveState('CACHE_PATHS', JSON.stringify(getCachePaths()))
       core.saveState('CACHE_RESULT', cacheHit ? 'true' : 'false')
     }
+
+    // Write Job Summary
+    await core.summary
+      .addHeading('UniRTM Setup Summary', 2)
+      .addTable([
+        [
+          { data: 'Item', header: true },
+          { data: 'Details', header: true }
+        ],
+        ['**UniRTM Version**', `v${installedVersion}`],
+        ['**Install Method**', `\`${method}\``],
+        ['**Cache Hit**', cacheHit ? '✅ Yes' : '❌ No']
+      ])
+      .write()
   } catch (err) {
     if (err instanceof Error) core.setFailed(err.message)
     else throw err
