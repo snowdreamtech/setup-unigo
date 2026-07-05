@@ -113,12 +113,12 @@ steps:
 
 Detects the best method based on available tools, in priority order:
 
-| Priority | Method    | Requirement                                                    |
-| -------- | --------- | -------------------------------------------------------------- |
-| 1        | `npm`     | `npm` is in PATH                                               |
-| 2        | `pip`     | `pip` or `pip3` is in PATH _(reserved, falls back to release)_ |
-| 3        | `release` | Any environment (downloads binary from GitHub Releases)        |
-| 4        | `go`      | `go` is in PATH                                                |
+| Priority | Method    | Requirement                                             |
+| -------- | --------- | ------------------------------------------------------- |
+| 1        | `npm`     | `npm` is in PATH                                        |
+| 2        | `pip`     | `pip` or `pip3` is in PATH                              |
+| 3        | `release` | Any environment (downloads binary from GitHub Releases) |
+| 4        | `go`      | `go` is in PATH                                         |
 
 ### `npm`
 
@@ -126,9 +126,11 @@ Detects the best method based on available tools, in priority order:
 npm install -g @snowdreamtech/unirtm@<version>
 ```
 
-### `pip` _(reserved)_
+### `pip`
 
-The PyPI package is not yet available. When selected, a warning is shown and the action falls back to the `release` method automatically.
+```bash
+pip install unirtm==<version>
+```
 
 ### `release`
 

@@ -76461,11 +76461,36 @@ async function installViaNpm(version3) {
 }
 async function installViaPip(version3) {
   startGroup(`Installing unirtm@${version3} via pip`);
-  warning(
-    'pip installation method is reserved for future use. The PyPI package "unirtm" is not yet available. Falling back to GitHub Release download.'
-  );
-  endGroup();
-  return installViaRelease(version3);
+  try {
+    const pipCmd = await which("pip3", false) || await which("pip", false);
+    if (!pipCmd) {
+      warning("pip3 or pip not found in PATH");
+      return false;
+    }
+    const args = ["install"];
+    if (version3 !== "latest") {
+      args.push(`unirtm==${version3}`);
+    } else {
+      args.push("unirtm");
+    }
+    const res = await getExecOutput(pipCmd, args, {
+      ignoreReturnCode: true
+    });
+    if (res.exitCode !== 0) {
+      warning(
+        `pip install failed (exit code ${res.exitCode}). stderr: ${res.stderr}`
+      );
+      return false;
+    }
+    info("\u2705 Successfully installed unirtm via pip");
+    return true;
+  } catch (error2) {
+    const msg = error2 instanceof Error ? error2.message : String(error2);
+    warning(`Error during pip install: ${msg}`);
+    return false;
+  } finally {
+    endGroup();
+  }
 }
 async function installViaRelease(version3) {
   startGroup(`Installing unirtm@${version3} via GitHub Release`);

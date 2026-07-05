@@ -327,10 +327,108 @@ jobs:
         shell: bash
         run: unirtm version
 
+  # ── pip install method test ──────────────────────────────────────────────────
+  test-action-pip:
+    name: Integration Test (${{ matrix.os }} / pip)
+    runs-on: ${{ matrix.os }}
+    needs: test-typescript
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-2022]
+
+    steps:
+      - name: '🔒 Harden Runner'
+        if: runner.os == 'Linux'
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            *.aquasecurity.github.io:443
+            *.azurecr.io:443
+            *.centos.org:443
+            *.debian.org:443
+            *.debian.org:80
+            *.dkr.ecr.*.amazonaws.com:443
+            *.gcr.io:443
+            *.githubusercontent.com:443
+            *.pkg.dev:443
+            *.quay.io:443
+            *.redhat.com:443
+            *.rockylinux.org:443
+            *.sigstore.dev:443
+            *.ubuntu.com:443
+            *.ubuntu.com:80
+            api.github.com:443
+            api.osv.dev:443
+            api.securityscorecards.dev:443
+            auth.docker.io:443
+            cdn.deno.land:443
+            deno.land:443
+            dl-cdn.alpinelinux.org:443
+            downloads.gradle-dn.com:443
+            downloads.gradle.org:443
+            files.pythonhosted.org:443
+            formulae.brew.sh:443
+            get.trivy.dev:443
+            ghcr.io:443
+            github.com:443
+            index.crates.io:443
+            index.docker.io:443
+            nodejs.org:443
+            oss-fuzz-build-logs.storage.googleapis.com:443
+            osv-vulnerabilities.storage.googleapis.com:443
+            packages.microsoft.com:443
+            packagist.org:443
+            pkg-containers.githubusercontent.com:443
+            production.cloudflare.docker.com:443
+            proxy.golang.org:443
+            public.ecr.aws:443
+            pypi.org:443
+            registry-1.docker.io:443
+            cdn.npmmirror.com:443
+            registry.npmmirror.com:443
+            registry.npmjs.org:443
+            registry.terraform.io:443
+            registry.yarnpkg.com:443
+            repo.maven.apache.org:443
+            repo.yarnpkg.com:443
+            rubygems.org:443
+            services.gradle.org:443
+            static.rust-lang.org:443
+            sum.golang.org:443
+            www.bestpractices.dev:443
+            storage.googleapis.com:443
+            go.dev:443
+            golang.org:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+
+      - name: Checkout
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: '3.12'
+
+      - name: Test Local Action (pip method)
+        id: setup-unirtm
+        uses: ./
+        with:
+          install_method: pip
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify unirtm in PATH
+        shell: bash
+        run: unirtm version
+
   # ── Release Orchestration ───────────────────────────────────────────────────
   release-please:
     name: '🚀 Release Orchestration'
-    needs: [test-action, test-action-go]
+    needs: [test-action, test-action-go, test-action-pip]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

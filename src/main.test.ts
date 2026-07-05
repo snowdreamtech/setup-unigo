@@ -147,19 +147,21 @@ describe('main.ts', () => {
     it('should detect pip if pip is available and npm is not', async () => {
       ;(io.which as Mock).mockImplementation(async cmd => {
         if (cmd === 'pip') return '/usr/bin/pip'
-        throw new Error('not found')
+        if (cmd === 'pip3') return ''
+        return ''
       })
-      ;(exec.exec as Mock).mockImplementation(async (cmd, _args) => {
-        if (cmd === 'curl') return 0
-        throw new Error('not found')
+      ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
+        if (cmd === '/usr/bin/pip') return { stdout: '', exitCode: 0 }
+        if (cmd === 'unirtm') return { stdout: '1.0.0', exitCode: 0 }
+        return { stdout: '', exitCode: 0 }
       })
 
       await run()
       expect(core.setOutput).toHaveBeenCalledWith('install-method', 'pip')
-      // pip currently falls back to release download
-      expect(exec.exec).toHaveBeenCalledWith(
-        'curl',
-        expect.arrayContaining(['-fsSL'])
+      expect(exec.getExecOutput).toHaveBeenCalledWith(
+        '/usr/bin/pip',
+        ['install', 'unirtm'],
+        expect.anything()
       )
     })
 
@@ -352,6 +354,76 @@ describe('main.ts', () => {
         expect(core.setFailed).toHaveBeenCalledWith(
           expect.stringContaining('Failed to install unirtm')
         )
+      })
+    })
+
+    describe('pip', () => {
+      beforeEach(() => {
+        ;(core.getInput as Mock).mockImplementation((input: string) => {
+          if (input === 'install_method') return 'pip'
+          if (input === 'unirtm-version') return '3.0.0'
+          return ''
+        })
+        ;(io.which as Mock).mockImplementation(async cmd => {
+          if (cmd === 'pip3') return '/usr/bin/pip3'
+          if (cmd === 'pip') return '/usr/bin/pip'
+          throw new Error('not found')
+        })
+      })
+
+      it('should install via pip with specific version', async () => {
+        ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
+          if (cmd === '/usr/bin/pip3' || cmd === '/usr/bin/pip')
+            return { exitCode: 0 }
+          if (cmd === 'unirtm') return { stdout: '3.0.0', exitCode: 0 }
+          return { stdout: '', exitCode: 0 }
+        })
+
+        await run()
+        expect(exec.getExecOutput).toHaveBeenCalledWith(
+          '/usr/bin/pip3',
+          ['install', 'unirtm==3.0.0'],
+          expect.anything()
+        )
+      })
+
+      it('should install latest unirtm via pip', async () => {
+        ;(core.getInput as Mock).mockImplementation((input: string) => {
+          if (input === 'install_method') return 'pip'
+          if (input === 'unirtm-version') return ''
+          return ''
+        })
+        ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
+          if (cmd === '/usr/bin/pip3' || cmd === '/usr/bin/pip')
+            return { exitCode: 0 }
+          if (cmd === 'unirtm') return { stdout: '4.0.0', exitCode: 0 }
+          if (cmd === 'curl')
+            return {
+              stdout: JSON.stringify([
+                { tag_name: 'v4.0.0', draft: false, prerelease: false }
+              ]),
+              exitCode: 0
+            }
+          return { stdout: '', exitCode: 0 }
+        })
+
+        await run()
+        expect(exec.getExecOutput).toHaveBeenCalledWith(
+          '/usr/bin/pip3',
+          ['install', 'unirtm'],
+          expect.anything()
+        )
+      })
+
+      it('should fail if pip install fails', async () => {
+        ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
+          if (cmd === '/usr/bin/pip3' || cmd === '/usr/bin/pip')
+            return { exitCode: 1, stderr: 'error' }
+          return { stdout: '', exitCode: 0 }
+        })
+
+        await run()
+        expect(core.setFailed).toHaveBeenCalled()
       })
     })
 

@@ -318,13 +318,40 @@ async function installViaNpm(version: string): Promise<boolean> {
  */
 async function installViaPip(version: string): Promise<boolean> {
   core.startGroup(`Installing unirtm@${version} via pip`)
-  core.warning(
-    'pip installation method is reserved for future use. ' +
-      'The PyPI package "unirtm" is not yet available. ' +
-      'Falling back to GitHub Release download.'
-  )
-  core.endGroup()
-  return installViaRelease(version)
+  try {
+    const pipCmd =
+      (await io.which('pip3', false)) || (await io.which('pip', false))
+    if (!pipCmd) {
+      core.warning('pip3 or pip not found in PATH')
+      return false
+    }
+
+    const args = ['install']
+    if (version !== 'latest') {
+      args.push(`unirtm==${version}`)
+    } else {
+      args.push('unirtm')
+    }
+
+    const res = await exec.getExecOutput(pipCmd, args, {
+      ignoreReturnCode: true
+    })
+    if (res.exitCode !== 0) {
+      core.warning(
+        `pip install failed (exit code ${res.exitCode}). stderr: ${res.stderr}`
+      )
+      return false
+    }
+
+    core.info('✅ Successfully installed unirtm via pip')
+    return true
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    core.warning(`Error during pip install: ${msg}`)
+    return false
+  } finally {
+    core.endGroup()
+  }
 }
 
 // ─── GitHub Release Installation ─────────────────────────────────────────────
