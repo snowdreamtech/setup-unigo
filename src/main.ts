@@ -215,15 +215,15 @@ async function detectInstallMethod(): Promise<InstallMethod> {
       core.info('✅ npm detected → using npm install')
       return 'npm'
     }
-    if (
-      (await isCommandAvailable('pip')) ||
-      (await isCommandAvailable('pip3'))
-    ) {
-      core.info(
-        '✅ pip detected → using pip install (note: PyPI package may not be available yet)'
-      )
-      return 'pip'
-    }
+    // if (
+    //   (await isCommandAvailable('pip')) ||
+    //   (await isCommandAvailable('pip3'))
+    // ) {
+    //   core.info(
+    //     '✅ pip detected → using pip install (note: PyPI package may not be available yet)'
+    //   )
+    //   return 'pip'
+    // }
     if (await isCommandAvailable('go')) {
       core.info('✅ go detected → using go install')
       return 'go'
