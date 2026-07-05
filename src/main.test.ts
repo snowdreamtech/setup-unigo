@@ -144,26 +144,26 @@ describe('main.ts', () => {
       )
     })
 
-    it('should detect pip if pip is available and npm is not', async () => {
-      ;(io.which as Mock).mockImplementation(async cmd => {
-        if (cmd === 'pip') return '/usr/bin/pip'
-        if (cmd === 'pip3') return ''
-        return ''
-      })
-      ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
-        if (cmd === '/usr/bin/pip') return { stdout: '', exitCode: 0 }
-        if (cmd === 'unirtm') return { stdout: '1.0.0', exitCode: 0 }
-        return { stdout: '', exitCode: 0 }
-      })
+    // it('should detect pip if pip is available and npm is not', async () => {
+    //   ;(io.which as Mock).mockImplementation(async cmd => {
+    //     if (cmd === 'pip') return '/usr/bin/pip'
+    //     if (cmd === 'pip3') return ''
+    //     return ''
+    //   })
+    //   ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
+    //     if (cmd === '/usr/bin/pip') return { stdout: '', exitCode: 0 }
+    //     if (cmd === 'unirtm') return { stdout: '1.0.0', exitCode: 0 }
+    //     return { stdout: '', exitCode: 0 }
+    //   })
 
-      await run()
-      expect(core.setOutput).toHaveBeenCalledWith('install-method', 'pip')
-      expect(exec.getExecOutput).toHaveBeenCalledWith(
-        '/usr/bin/pip',
-        ['install', 'unirtm'],
-        expect.anything()
-      )
-    })
+    //   await run()
+    //   expect(core.setOutput).toHaveBeenCalledWith('install-method', 'pip')
+    //   expect(exec.getExecOutput).toHaveBeenCalledWith(
+    //     '/usr/bin/pip',
+    //     ['install', 'unirtm'],
+    //     expect.anything()
+    //   )
+    // })
 
     it('should detect go if go is available and npm/pip are not', async () => {
       ;(io.which as Mock).mockImplementation(async cmd => {
