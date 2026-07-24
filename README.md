@@ -129,7 +129,7 @@ npm install -g @snowdreamtech/unirtm@<version>
 ### `pip`
 
 ```bash
-pip install unirtm==<version>
+pip install snowdreamtech-unirtm==<version>
 ```
 
 ### `release`

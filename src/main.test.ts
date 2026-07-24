@@ -382,7 +382,7 @@ describe('main.ts', () => {
         await run()
         expect(exec.getExecOutput).toHaveBeenCalledWith(
           '/usr/bin/pip3',
-          ['install', 'unirtm==3.0.0'],
+          ['install', 'snowdreamtech-unirtm==3.0.0'],
           expect.anything()
         )
       })
@@ -410,7 +410,7 @@ describe('main.ts', () => {
         await run()
         expect(exec.getExecOutput).toHaveBeenCalledWith(
           '/usr/bin/pip3',
-          ['install', 'unirtm'],
+          ['install', 'snowdreamtech-unirtm'],
           expect.anything()
         )
       })

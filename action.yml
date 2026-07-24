@@ -53,7 +53,7 @@ inputs:
       Installation method. One of: auto, npm, pip, release, go.
       - auto: Smart detection based on available runtimes (npm → pip → release → go)
       - npm:  Install via `npm install -g @snowdreamtech/unirtm`
-      - pip:  Install via `pip install unirtm`
+      - pip:  Install via `pip install snowdreamtech-unirtm`
       - release: Download binary from GitHub Releases
       - go:   Install via `go install github.com/snowdreamtech/UniRTM/cmd/unirtm@...`
 

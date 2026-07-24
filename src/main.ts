@@ -328,9 +328,9 @@ async function installViaPip(version: string): Promise<boolean> {
 
     const args = ['install']
     if (version !== 'latest') {
-      args.push(`unirtm==${version}`)
+      args.push(`snowdreamtech-unirtm==${version}`)
     } else {
-      args.push('unirtm')
+      args.push('snowdreamtech-unirtm')
     }
 
     const res = await exec.getExecOutput(pipCmd, args, {
