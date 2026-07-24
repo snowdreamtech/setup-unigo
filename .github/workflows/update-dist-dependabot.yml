@@ -1,0 +1,55 @@
+name: Update dist/ on Dependabot PRs
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.WORKFLOW_SECRET || secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build dist/
+        run: npm run package
+
+      - name: '📝 Commit Changes (if any)'
+        shell: sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_SECRET || secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ github.head_ref }}
+        run: |
+          if [ -z "$(git status --porcelain dist/index.cjs dist/post.cjs)" ]; then
+            echo "✅ No changes detected in dist/. Everything is up-to-date."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add dist/index.cjs dist/post.cjs
+            git commit --signoff -m "build(dist): update dist/ for dependabot PR"
+            git push origin HEAD:"$GITHUB_REF"
+            echo "✅ dist/ updated and pushed to Dependabot PR."
+          fi
