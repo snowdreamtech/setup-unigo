@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/snowdreamtech/setup-unirtm/compare/v0.5.0...v0.6.0) (2026-07-24)
+
+
+### Features
+
+* add support for concurrent blob downloads in artifact caching ([9b9d1bb](https://github.com/snowdreamtech/setup-unirtm/commit/9b9d1bb9323907dcc47782922d82f03471ab152a))
+
+
+### Bug Fixes
+
+* correct pip package name and remove legacy Harden Runner ([190f867](https://github.com/snowdreamtech/setup-unirtm/commit/190f867ac9f43edf7c7ebe2ea27926d3cab76871))
+
 ## [0.5.0](https://github.com/snowdreamtech/setup-unirtm/compare/v0.4.1...v0.5.0) (2026-07-05)
 
 
