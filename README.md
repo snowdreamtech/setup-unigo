@@ -32,7 +32,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      unirtm-version: '0.4.2'
+      unirtm-version: '0.25.7'
 ```
 
 ### Force a specific install method
@@ -61,7 +61,7 @@ steps:
 steps:
   - uses: snowdreamtech/setup-unirtm@v0
     with:
-      unirtm-version: '0.4.2'
+      unirtm-version: '0.25.7'
       install: true
       install_args: 'node python'
       cache: true
@@ -83,7 +83,7 @@ steps:
 
 | Input              | Required | Default               | Description                                                               |
 | ------------------ | -------- | --------------------- | ------------------------------------------------------------------------- |
-| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.4.2`)                              |
+| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.25.7`)                             |
 | `install`          | No       | `false`               | Run `unirtm install` after setup                                          |
 | `install_args`     | No       | `""`                  | Arguments passed to `unirtm install` (e.g. `"node python"`)               |
 | `trust`            | No       | `false`               | Run `unirtm trust` after setting up unirtm                                |
