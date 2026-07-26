@@ -55,15 +55,13 @@ steps:
       github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### With caching and tool installation
+### With caching
 
 ```yaml
 steps:
   - uses: snowdreamtech/setup-unigo@v0
     with:
       unigo-version: '0.25.7'
-      install: true
-      install_args: 'node python'
       cache: true
       github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -84,9 +82,6 @@ steps:
 | Input              | Required | Default               | Description                                                               |
 | ------------------ | -------- | --------------------- | ------------------------------------------------------------------------- |
 | `unigo-version`    | No       | `""` (latest)         | The unigo version to install (e.g. `0.25.7`)                              |
-| `install`          | No       | `false`               | Run `unigo install` after setup                                           |
-| `install_args`     | No       | `""`                  | Arguments passed to `unigo install` (e.g. `"node python"`)                |
-| `trust`            | No       | `false`               | Run `unigo trust` after setting up unigo                                  |
 | `github_token`     | No       | `${{ github.token }}` | GitHub token for API auth and rate limit avoidance                        |
 | `github_proxy`     | No       | `""`                  | Proxy prefix for GitHub download URLs (also reads `GITHUB_PROXY` env var) |
 | `install_method`   | No       | `auto`                | Installation method: `auto` / `npm` / `pip` / `release` / `go`            |
@@ -149,16 +144,15 @@ go install github.com/snowdreamtech/UniGo/cmd/unigo@v<version>
 
 When using a custom `cache_key`, the following [Handlebars](https://handlebarsjs.com/) variables are available:
 
-| Variable                | Description                                                |
-| ----------------------- | ---------------------------------------------------------- |
-| `{{version}}`           | The unigo version (from the `unigo-version` input)         |
-| `{{cache_key_prefix}}`  | The cache key prefix (from `cache_key_prefix` input)       |
-| `{{platform}}`          | Target platform + runner image (e.g. `linux-x64-ubuntu24`) |
-| `{{file_hash}}`         | Hash of unigo config files (`.unigo.toml`, `unigo.lock`)   |
-| `{{unigo_env}}`         | Value of `UNIGO_ENV` environment variable                  |
-| `{{mise_env}}`          | Value of `MISE_ENV` environment variable                   |
-| `{{install_args_hash}}` | SHA256 hash of sorted tools from `install_args`            |
-| `{{default}}`           | The computed default cache key (useful for extending)      |
+| Variable               | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| `{{version}}`          | The unigo version (from the `unigo-version` input)         |
+| `{{cache_key_prefix}}` | The cache key prefix (from `cache_key_prefix` input)       |
+| `{{platform}}`         | Target platform + runner image (e.g. `linux-x64-ubuntu24`) |
+| `{{file_hash}}`        | Hash of unigo config files (`.unigo.toml`, `unigo.lock`)   |
+| `{{unigo_env}}`        | Value of `UNIGO_ENV` environment variable                  |
+| `{{mise_env}}`         | Value of `MISE_ENV` environment variable                   |
+| `{{default}}`          | The computed default cache key (useful for extending)      |
 
 **Conditional syntax:**
 

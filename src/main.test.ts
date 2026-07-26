@@ -58,8 +58,6 @@ describe('main.ts', () => {
           return ''
         case 'github_proxy':
           return ''
-        case 'install_args':
-          return ''
         case 'cache_key':
           return ''
         case 'cache_key_prefix':
@@ -73,10 +71,6 @@ describe('main.ts', () => {
         case 'cache':
           return false
         case 'cache_save':
-          return false
-        case 'trust':
-          return false
-        case 'install':
           return false
         default:
           return false
@@ -648,114 +642,6 @@ describe('main.ts', () => {
         stdout: '1.0.0',
         exitCode: 0
       })
-    })
-
-    it('should include install_args in cache key', async () => {
-      ;(core.getInput as Mock).mockImplementation((input: string) => {
-        if (input === 'install_args') return 'tool1 -f tool2'
-        return 'auto'
-      })
-      await run()
-      expect(core.saveState).toHaveBeenCalled()
-    })
-
-    it('should restore cache and save state on miss', async () => {
-      ;(cache.restoreCache as Mock).mockResolvedValue(undefined)
-
-      await run()
-
-      expect(cache.restoreCache).toHaveBeenCalled()
-      expect(core.saveState).toHaveBeenCalledWith(
-        'PRIMARY_KEY',
-        expect.any(String)
-      )
-      expect(core.saveState).toHaveBeenCalledWith(
-        'CACHE_PATHS',
-        expect.any(String)
-      )
-    })
-
-    it('should restore cache and NOT save state on hit', async () => {
-      ;(cache.restoreCache as Mock).mockImplementation(
-        async (paths, key) => key
-      )
-
-      await run()
-
-      expect(cache.restoreCache).toHaveBeenCalled()
-      expect(core.notice).toHaveBeenCalledWith(
-        '✅ Cache hit — tools data restored from cache'
-      )
-    })
-
-    it('should skip unigo install on exact cache hit', async () => {
-      ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
-        if (input === 'cache') return true
-        if (input === 'cache_save') return true
-        if (input === 'install') return true
-        return false
-      })
-      // Simulate exact cache hit
-      ;(cache.restoreCache as Mock).mockImplementation(
-        async (paths, key) => key
-      )
-
-      await run()
-
-      expect(core.notice).toHaveBeenCalledWith(
-        '⚡ Cache hit — skipping unigo install (tools already restored from cache)'
-      )
-      // Should NOT call unigo install
-      expect(exec.exec).not.toHaveBeenCalledWith(
-        'unigo',
-        expect.arrayContaining(['install'])
-      )
-    })
-
-    it('should run unigo install on cache miss even when cache is enabled', async () => {
-      ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
-        if (input === 'cache') return true
-        if (input === 'cache_save') return true
-        if (input === 'install') return true
-        return false
-      })
-      // Simulate cache miss
-      ;(cache.restoreCache as Mock).mockResolvedValue(undefined)
-
-      await run()
-
-      // Should call unigo install
-      expect(exec.exec).toHaveBeenCalledWith('unigo', ['install'])
-    })
-  })
-
-  describe('Trust and Install Commands', () => {
-    beforeEach(() => {
-      ;(core.getInput as Mock).mockImplementation((input: string) => {
-        if (input === 'install_method') return 'npm'
-        if (input === 'install_args') return 'tool1 tool2'
-        return ''
-      })
-      ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
-        if (input === 'trust') return true
-        if (input === 'install') return true
-        return false
-      })
-      ;(exec.getExecOutput as Mock).mockResolvedValue({
-        stdout: '1.0.0',
-        exitCode: 0
-      })
-    })
-
-    it('should run unigo trust and unigo install if requested', async () => {
-      await run()
-
-      expect(exec.exec).toHaveBeenCalledWith('unigo', ['trust'])
-      expect(exec.exec).toHaveBeenCalledWith('unigo', [
-        'install',
-        'tool1',
-        'tool2'
-      ])
     })
   })
 
