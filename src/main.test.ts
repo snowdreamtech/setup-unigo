@@ -627,24 +627,6 @@ describe('main.ts', () => {
     })
   })
 
-  describe('Cache Logic', () => {
-    beforeEach(() => {
-      ;(core.getInput as Mock).mockImplementation((input: string) => {
-        if (input === 'install_method') return 'npm'
-        return ''
-      })
-      ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
-        if (input === 'cache') return true
-        if (input === 'cache_save') return true
-        return false
-      })
-      ;(exec.getExecOutput as Mock).mockResolvedValue({
-        stdout: '1.0.0',
-        exitCode: 0
-      })
-    })
-  })
-
   describe('Error handling', () => {
     it('should catch errors and call setFailed', async () => {
       ;(core.getInput as Mock).mockImplementation(() => {
