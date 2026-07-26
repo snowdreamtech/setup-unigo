@@ -1,22 +1,22 @@
 {
-  "name": "setup-unirtm",
-  "description": "GitHub Action to setup UniRTM (Uni Runtime and Tools Manager)",
+  "name": "setup-unigo",
+  "description": "GitHub Action to setup UniGo (Uni Runtime and Tools Manager)",
   "version": "0.6.0",
   "author": "Snowdream Tech",
   "private": true,
-  "homepage": "https://github.com/snowdreamtech/setup-unirtm",
+  "homepage": "https://github.com/snowdreamtech/setup-unigo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/snowdreamtech/setup-unirtm.git"
+    "url": "git+https://github.com/snowdreamtech/setup-unigo.git"
   },
   "bugs": {
-    "url": "https://github.com/snowdreamtech/setup-unirtm/issues"
+    "url": "https://github.com/snowdreamtech/setup-unigo/issues"
   },
   "keywords": [
     "actions",
     "node",
     "setup",
-    "unirtm"
+    "unigo"
   ],
   "exports": {
     ".": "./dist/index.cjs"
@@ -27,15 +27,15 @@
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
-    "ci-test": "npx vitest run --coverage",
-    "format:write": "npx prettier --write .",
-    "format:check": "npx prettier --check .",
-    "lint": "npx eslint .",
-    "package:index": "npx -y esbuild src/index.ts --bundle --platform=node --target=node24 --format=cjs --minify --define:import.meta.url=import_meta_url --banner:js=\"const import_meta_url = require('url').pathToFileURL(__filename).href;\" --outfile=dist/index.cjs",
-    "package:post": "npx -y esbuild src/post.ts --bundle --platform=node --target=node24 --format=cjs --minify --define:import.meta.url=import_meta_url --banner:js=\"const import_meta_url = require('url').pathToFileURL(__filename).href;\" --outfile=dist/post.cjs",
+    "ci-test": "vitest run --coverage",
+    "format:write": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "package:index": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=cjs --minify --define:import.meta.url=import_meta_url --banner:js=\"const import_meta_url = require('url').pathToFileURL(__filename).href;\" --outfile=dist/index.cjs",
+    "package:post": "esbuild src/post.ts --bundle --platform=node --target=node24 --format=cjs --minify --define:import.meta.url=import_meta_url --banner:js=\"const import_meta_url = require('url').pathToFileURL(__filename).href;\" --outfile=dist/post.cjs",
     "package": "npm run package:index && npm run package:post",
     "package:watch": "npm run package -- --watch",
-    "test": "npx vitest run --coverage",
+    "test": "vitest run --coverage",
     "all": "npm run format:write && npm run lint && npm run test && npm run package",
     "prepare": "husky"
   },

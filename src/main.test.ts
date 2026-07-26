@@ -9,7 +9,7 @@ import * as glob from '@actions/glob'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { run, saveUnirtmCache } from './main.js'
+import { run, saveUnigoCache } from './main.js'
 import './post.js'
 
 // Mock dependencies
@@ -50,7 +50,7 @@ describe('main.ts', () => {
     // Default mock inputs
     ;(core.getInput as Mock).mockImplementation((input: string) => {
       switch (input) {
-        case 'unirtm-version':
+        case 'unigo-version':
           return ''
         case 'install_method':
           return 'auto'
@@ -98,7 +98,7 @@ describe('main.ts', () => {
           exitCode: 0
         }
       }
-      if (cmd === 'unirtm') {
+      if (cmd === 'unigo') {
         return { stdout: '1.0.0', exitCode: 0 }
       }
       return { stdout: '', exitCode: 0 }
@@ -136,11 +136,7 @@ describe('main.ts', () => {
       expect(core.setOutput).toHaveBeenCalledWith('install-method', 'npm')
       expect(exec.exec).toHaveBeenCalledWith(
         'npm',
-        expect.arrayContaining([
-          'install',
-          '-g',
-          '@snowdreamtech/unirtm@latest'
-        ])
+        expect.arrayContaining(['install', '-g', '@snowdreamtech/unigo@latest'])
       )
     })
 
@@ -161,7 +157,7 @@ describe('main.ts', () => {
       expect(core.setOutput).toHaveBeenCalledWith('install-method', 'pip')
       expect(exec.getExecOutput).toHaveBeenCalledWith(
         '/usr/bin/pip',
-        ['install', 'snowdreamtech-unirtm'],
+        ['install', 'snowdreamtech-unigo'],
         expect.anything()
       )
     })
@@ -207,7 +203,7 @@ describe('main.ts', () => {
             exitCode: 0
           }
         }
-        if (cmd === 'unirtm' && args && args.includes('version')) {
+        if (cmd === 'unigo' && args && args.includes('version')) {
           return { stdout: '1.0.0', exitCode: 0 }
         }
         return { stdout: '', exitCode: 0 }
@@ -215,7 +211,7 @@ describe('main.ts', () => {
 
       // We need fs to pretend to find the binary
       ;(fs.promises.readdir as Mock).mockResolvedValue([
-        { name: 'unirtm', isDirectory: () => false }
+        { name: 'unigo', isDirectory: () => false }
       ])
 
       await run()
@@ -237,10 +233,10 @@ describe('main.ts', () => {
       // Ensure commands mock out to not fail
       ;(exec.exec as Mock).mockResolvedValue(0)
       ;(fs.promises.readdir as Mock).mockResolvedValue([
-        { name: 'unirtm', isDirectory: () => false }
+        { name: 'unigo', isDirectory: () => false }
       ])
       ;(exec.getExecOutput as Mock).mockImplementation(async (cmd, args) => {
-        if (cmd === 'unirtm' && args.includes('version')) {
+        if (cmd === 'unigo' && args.includes('version')) {
           return { stdout: '1.0.0', exitCode: 0 }
         }
         return { stdout: '', exitCode: 0 }
@@ -261,13 +257,13 @@ describe('main.ts', () => {
         }
       )
       await run()
-      expect(core.info).toHaveBeenCalledWith('Target unirtm version: 0.9.0')
+      expect(core.info).toHaveBeenCalledWith('Target unigo version: 0.9.0')
     })
 
     it('should fetch latest version if version is "latest"', async () => {
       ;(core.getInput as Mock).mockImplementation((input: string) => {
         if (input === 'install_method') return 'release'
-        if (input === 'unirtm-version') return 'latest'
+        if (input === 'unigo-version') return 'latest'
         return ''
       })
       ;(exec.getExecOutput as Mock).mockImplementationOnce(
@@ -282,7 +278,7 @@ describe('main.ts', () => {
         }
       )
       await run()
-      expect(core.info).toHaveBeenCalledWith('Target unirtm version: 1.1.0')
+      expect(core.info).toHaveBeenCalledWith('Target unigo version: 1.1.0')
     })
 
     it('should fallback to latest string if not enough releases', async () => {
@@ -292,7 +288,7 @@ describe('main.ts', () => {
         }
       )
       await run()
-      expect(core.info).toHaveBeenCalledWith('Target unirtm version: latest')
+      expect(core.info).toHaveBeenCalledWith('Target unigo version: latest')
     })
 
     it('should pass github_token if provided', async () => {
@@ -325,7 +321,7 @@ describe('main.ts', () => {
       beforeEach(() => {
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'npm'
-          if (input === 'unirtm-version') return '2.0.0'
+          if (input === 'unigo-version') return '2.0.0'
           return ''
         })
       })
@@ -334,7 +330,7 @@ describe('main.ts', () => {
         ;(exec.getExecOutput as Mock).mockImplementation(async (cmd, args) => {
           if (cmd === 'npm' && args.includes('prefix'))
             return { stdout: '/npm/prefix', exitCode: 0 }
-          if (cmd === 'unirtm') return { stdout: '2.0.0', exitCode: 0 }
+          if (cmd === 'unigo') return { stdout: '2.0.0', exitCode: 0 }
           return { stdout: '', exitCode: 0 }
         })
 
@@ -342,7 +338,7 @@ describe('main.ts', () => {
         expect(exec.exec).toHaveBeenCalledWith('npm', [
           'install',
           '-g',
-          '@snowdreamtech/unirtm@2.0.0'
+          '@snowdreamtech/unigo@2.0.0'
         ])
         expect(core.addPath).toHaveBeenCalledWith(
           path.join('/npm/prefix', 'bin')
@@ -353,7 +349,7 @@ describe('main.ts', () => {
         ;(exec.exec as Mock).mockResolvedValue(1) // Failed
         await run()
         expect(core.setFailed).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to install unirtm')
+          expect.stringContaining('Failed to install unigo')
         )
       })
     })
@@ -362,7 +358,7 @@ describe('main.ts', () => {
       beforeEach(() => {
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'pip'
-          if (input === 'unirtm-version') return '3.0.0'
+          if (input === 'unigo-version') return '3.0.0'
           return ''
         })
         ;(io.which as Mock).mockImplementation(async cmd => {
@@ -376,28 +372,28 @@ describe('main.ts', () => {
         ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
           if (cmd === '/usr/bin/pip3' || cmd === '/usr/bin/pip')
             return { exitCode: 0 }
-          if (cmd === 'unirtm') return { stdout: '3.0.0', exitCode: 0 }
+          if (cmd === 'unigo') return { stdout: '3.0.0', exitCode: 0 }
           return { stdout: '', exitCode: 0 }
         })
 
         await run()
         expect(exec.getExecOutput).toHaveBeenCalledWith(
           '/usr/bin/pip3',
-          ['install', 'snowdreamtech-unirtm==3.0.0'],
+          ['install', 'snowdreamtech-unigo==3.0.0'],
           expect.anything()
         )
       })
 
-      it('should install latest unirtm via pip', async () => {
+      it('should install latest unigo via pip', async () => {
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'pip'
-          if (input === 'unirtm-version') return ''
+          if (input === 'unigo-version') return ''
           return ''
         })
         ;(exec.getExecOutput as Mock).mockImplementation(async cmd => {
           if (cmd === '/usr/bin/pip3' || cmd === '/usr/bin/pip')
             return { exitCode: 0 }
-          if (cmd === 'unirtm') return { stdout: '4.0.0', exitCode: 0 }
+          if (cmd === 'unigo') return { stdout: '4.0.0', exitCode: 0 }
           if (cmd === 'curl')
             return {
               stdout: JSON.stringify([
@@ -411,7 +407,7 @@ describe('main.ts', () => {
         await run()
         expect(exec.getExecOutput).toHaveBeenCalledWith(
           '/usr/bin/pip3',
-          ['install', 'snowdreamtech-unirtm'],
+          ['install', 'snowdreamtech-unigo'],
           expect.anything()
         )
       })
@@ -432,7 +428,7 @@ describe('main.ts', () => {
       beforeEach(() => {
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'go'
-          if (input === 'unirtm-version') return '1.2.3'
+          if (input === 'unigo-version') return '1.2.3'
           return ''
         })
       })
@@ -461,7 +457,7 @@ describe('main.ts', () => {
         await run()
         expect(exec.exec).toHaveBeenCalledWith('go', [
           'install',
-          'github.com/snowdreamtech/unirtm@v1.2.3'
+          'github.com/snowdreamtech/unigo@v1.2.3'
         ])
         expect(core.addPath).toHaveBeenCalledWith(
           path.join('/fake/gopath', 'bin')
@@ -485,7 +481,7 @@ describe('main.ts', () => {
       beforeEach(() => {
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'release'
-          if (input === 'unirtm-version') return '1.5.0'
+          if (input === 'unigo-version') return '1.5.0'
           return ''
         })
         ;(exec.getExecOutput as Mock).mockResolvedValue({
@@ -498,7 +494,7 @@ describe('main.ts', () => {
         Object.defineProperty(process, 'platform', { value: 'linux' })
         Object.defineProperty(process, 'arch', { value: 'x64' })
         ;(fs.promises.readdir as Mock).mockResolvedValue([
-          { name: 'unirtm', isDirectory: () => false }
+          { name: 'unigo', isDirectory: () => false }
         ])
 
         await run()
@@ -522,7 +518,7 @@ describe('main.ts', () => {
         Object.defineProperty(process, 'platform', { value: 'win32' })
         Object.defineProperty(process, 'arch', { value: 'x64' })
         ;(fs.promises.readdir as Mock).mockResolvedValue([
-          { name: 'unirtm.exe', isDirectory: () => false }
+          { name: 'unigo.exe', isDirectory: () => false }
         ])
 
         await run()
@@ -540,12 +536,12 @@ describe('main.ts', () => {
         Object.defineProperty(process, 'arch', { value: 'arm64' })
         ;(core.getInput as Mock).mockImplementation((input: string) => {
           if (input === 'install_method') return 'release'
-          if (input === 'unirtm-version') return '1.5.0'
+          if (input === 'unigo-version') return '1.5.0'
           if (input === 'github_proxy') return 'https://mirror.example.com/'
           return ''
         })
         ;(fs.promises.readdir as Mock).mockResolvedValue([
-          { name: 'unirtm', isDirectory: () => false }
+          { name: 'unigo', isDirectory: () => false }
         ])
 
         await run()
@@ -585,7 +581,7 @@ describe('main.ts', () => {
           { name: 'subdir', isDirectory: () => true, isFile: () => false }
         ] as never)
         ;(fs.promises.readdir as Mock).mockResolvedValueOnce([
-          { name: 'unirtm', isDirectory: () => false, isFile: () => true }
+          { name: 'unigo', isDirectory: () => false, isFile: () => true }
         ] as never)
 
         await run()
@@ -596,7 +592,7 @@ describe('main.ts', () => {
         Object.defineProperty(process, 'platform', { value: 'linux' })
         Object.defineProperty(process, 'arch', { value: 'x64' })
         ;(fs.promises.readdir as Mock).mockResolvedValue([
-          { name: 'unirtm', isDirectory: () => false }
+          { name: 'unigo', isDirectory: () => false }
         ])
 
         let curlAttempts = 0
@@ -630,7 +626,7 @@ describe('main.ts', () => {
         )
         expect(core.setFailed).toHaveBeenCalledWith(
           expect.stringContaining(
-            'Failed to install unirtm@1.5.0 via method "release"'
+            'Failed to install unigo@1.5.0 via method "release"'
           )
         )
       })
@@ -692,7 +688,7 @@ describe('main.ts', () => {
       )
     })
 
-    it('should skip unirtm install on exact cache hit', async () => {
+    it('should skip unigo install on exact cache hit', async () => {
       ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
         if (input === 'cache') return true
         if (input === 'cache_save') return true
@@ -707,16 +703,16 @@ describe('main.ts', () => {
       await run()
 
       expect(core.notice).toHaveBeenCalledWith(
-        '⚡ Cache hit — skipping unirtm install (tools already restored from cache)'
+        '⚡ Cache hit — skipping unigo install (tools already restored from cache)'
       )
-      // Should NOT call unirtm install
+      // Should NOT call unigo install
       expect(exec.exec).not.toHaveBeenCalledWith(
-        'unirtm',
+        'unigo',
         expect.arrayContaining(['install'])
       )
     })
 
-    it('should run unirtm install on cache miss even when cache is enabled', async () => {
+    it('should run unigo install on cache miss even when cache is enabled', async () => {
       ;(core.getBooleanInput as Mock).mockImplementation((input: string) => {
         if (input === 'cache') return true
         if (input === 'cache_save') return true
@@ -728,8 +724,8 @@ describe('main.ts', () => {
 
       await run()
 
-      // Should call unirtm install
-      expect(exec.exec).toHaveBeenCalledWith('unirtm', ['install'])
+      // Should call unigo install
+      expect(exec.exec).toHaveBeenCalledWith('unigo', ['install'])
     })
   })
 
@@ -751,11 +747,11 @@ describe('main.ts', () => {
       })
     })
 
-    it('should run unirtm trust and unirtm install if requested', async () => {
+    it('should run unigo trust and unigo install if requested', async () => {
       await run()
 
-      expect(exec.exec).toHaveBeenCalledWith('unirtm', ['trust'])
-      expect(exec.exec).toHaveBeenCalledWith('unirtm', [
+      expect(exec.exec).toHaveBeenCalledWith('unigo', ['trust'])
+      expect(exec.exec).toHaveBeenCalledWith('unigo', [
         'install',
         'tool1',
         'tool2'
@@ -785,27 +781,27 @@ describe('main.ts', () => {
   })
 
   describe('Unused exports and unsupported platforms', () => {
-    it('saveUnirtmCache does nothing if no paths exist', async () => {
+    it('saveUnigoCache does nothing if no paths exist', async () => {
       ;(fs.existsSync as Mock).mockReturnValue(false)
-      await saveUnirtmCache('test-key')
+      await saveUnigoCache('test-key')
       expect(core.warning).toHaveBeenCalledWith(
         expect.stringContaining('No cache paths found on disk')
       )
     })
 
-    it('saveUnirtmCache saves cache if paths exist', async () => {
+    it('saveUnigoCache saves cache if paths exist', async () => {
       ;(fs.existsSync as Mock).mockReturnValue(true)
       ;(cache.saveCache as Mock).mockResolvedValue(123)
-      await saveUnirtmCache('test-key')
+      await saveUnigoCache('test-key')
       expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining('Cache saved')
       )
     })
 
-    it('saveUnirtmCache logs if cache already exists', async () => {
+    it('saveUnigoCache logs if cache already exists', async () => {
       ;(fs.existsSync as Mock).mockReturnValue(true)
       ;(cache.saveCache as Mock).mockResolvedValue(-1)
-      await saveUnirtmCache('test-key')
+      await saveUnigoCache('test-key')
       expect(core.info).toHaveBeenCalledWith(
         expect.stringContaining('Cache already exists')
       )

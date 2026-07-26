@@ -3,7 +3,6 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as cache from '@actions/cache'
 import * as glob from '@actions/glob'
-import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
@@ -11,11 +10,11 @@ import * as Handlebars from 'handlebars'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const UNIRTM_CONFIG_FILE_PATTERNS = [
-  '**/.unirtm.toml',
-  '**/unirtm.toml',
-  '**/unirtm.lock',
-  '**/.unirtm.lock',
+const UNIGO_CONFIG_FILE_PATTERNS = [
+  '**/.unigo.toml',
+  '**/unigo.toml',
+  '**/unigo.lock',
+  '**/.unigo.lock',
   '**/.mise.toml',
   '**/mise.toml',
   '**/.tool-versions'
@@ -24,20 +23,19 @@ const UNIRTM_CONFIG_FILE_PATTERNS = [
 const DEFAULT_CACHE_KEY_TEMPLATE =
   '{{cache_key_prefix}}-{{platform}}' +
   '{{#if version}}-{{version}}{{/if}}' +
-  '{{#if unirtm_env}}-{{unirtm_env}}{{/if}}' +
+  '{{#if unigo_env}}-{{unigo_env}}{{/if}}' +
   '{{#if mise_env}}-{{mise_env}}{{/if}}' +
-  '{{#if install_args_hash}}-{{install_args_hash}}{{/if}}' +
   '-{{#if file_hash}}{{file_hash}}{{else}}no-config{{/if}}'
 
 const GITHUB_RELEASES_API =
-  'https://api.github.com/repos/snowdreamtech/UniRTM/releases'
+  'https://api.github.com/repos/snowdreamtech/UniGo/releases'
 
 const GITHUB_RELEASE_DOWNLOAD_BASE =
-  'https://github.com/snowdreamtech/UniRTM/releases/download'
+  'https://github.com/snowdreamtech/UniGo/releases/download'
 
-const NPM_PACKAGE = '@snowdreamtech/unirtm'
+const NPM_PACKAGE = '@snowdreamtech/unigo'
 
-const GO_MODULE = 'github.com/snowdreamtech/unirtm'
+const GO_MODULE = 'github.com/snowdreamtech/unigo'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -51,7 +49,7 @@ type InstallMethod = 'npm' | 'pip' | 'release' | 'go'
 export async function run(): Promise<void> {
   try {
     const requestedVersion = core
-      .getInput('unirtm-version')
+      .getInput('unigo-version')
       .trim()
       .replace(/^[vV]/, '')
     const requestedMethod = core.getInput('install_method').trim() as
@@ -85,24 +83,24 @@ export async function run(): Promise<void> {
       cacheVersion = installVersion
     }
 
-    core.info(`Target unirtm version: ${installVersion}`)
+    core.info(`Target unigo version: ${installVersion}`)
 
     // 3. Restore cache
     let cacheKey: string | undefined
     let cacheHit = false
     if (core.getBooleanInput('cache')) {
-      const result = await restoreUnirtmCache(cacheVersion)
+      const result = await restoreUnigoCache(cacheVersion)
       cacheKey = result.primaryKey
       cacheHit = result.hit
     } else {
       core.setOutput('cache-hit', false)
     }
 
-    // Always install unirtm to ensure the binary is correctly placed and PATH is set
-    const installed = await installUnirtm(method, installVersion)
+    // Always install unigo to ensure the binary is correctly placed and PATH is set
+    const installed = await installUnigo(method, installVersion)
     if (!installed) {
       core.setFailed(
-        `Failed to install unirtm@${installVersion} via method "${method}"`
+        `Failed to install unigo@${installVersion} via method "${method}"`
       )
       return
     }
@@ -112,25 +110,9 @@ export async function run(): Promise<void> {
     }
 
     // Verify installation
-    const installedVersion = await verifyUnirtm()
-    core.setOutput('unirtm-version', installedVersion)
-    core.info(`unirtm ${installedVersion} is ready`)
-
-    // Run unirtm trust if requested
-    if (core.getBooleanInput('trust')) {
-      await runUnirtmTrust()
-    }
-
-    // Run unirtm install if requested (skip on exact cache hit — tools already restored)
-    if (core.getBooleanInput('install')) {
-      if (cacheHit) {
-        core.notice(
-          '⚡ Cache hit — skipping unirtm install (tools already restored from cache)'
-        )
-      } else {
-        await runUnirtmInstall()
-      }
-    }
+    const installedVersion = await verifyUnigo()
+    core.setOutput('unigo-version', installedVersion)
+    core.info(`unigo ${installedVersion} is ready`)
 
     // Save cache (only on cache miss; post-action handles the actual save)
     if (cacheKey && core.getBooleanInput('cache_save')) {
@@ -141,13 +123,13 @@ export async function run(): Promise<void> {
 
     // Write Job Summary
     await core.summary
-      .addHeading('UniRTM Setup Summary', 2)
+      .addHeading('UniGo Setup Summary', 2)
       .addTable([
         [
           { data: 'Item', header: true },
           { data: 'Details', header: true }
         ],
-        ['**UniRTM Version**', `v${installedVersion}`],
+        ['**UniGo Version**', `v${installedVersion}`],
         ['**Install Method**', `\`${method}\``],
         ['**Cache Hit**', cacheHit ? '✅ Yes' : '❌ No']
       ])
@@ -161,12 +143,12 @@ export async function run(): Promise<void> {
 // ─── Version Resolution ───────────────────────────────────────────────────────
 
 /**
- * Fetch the target unirtm version from GitHub API.
+ * Fetch the target unigo version from GitHub API.
  * @param absoluteLatest If true, fetches the absolute latest release. If false, fetches the second latest.
  */
 async function fetchLatestVersion(absoluteLatest: boolean): Promise<string> {
   const targetDesc = absoluteLatest ? 'latest' : 'second latest'
-  core.startGroup(`Fetching target unirtm version (${targetDesc})`)
+  core.startGroup(`Fetching target unigo version (${targetDesc})`)
   try {
     const token = core.getInput('github_token')
     const args = ['-fsSL', GITHUB_RELEASES_API]
@@ -258,7 +240,7 @@ function methodUsesRegistryLatest(method: InstallMethod): boolean {
   return method === 'npm' || method === 'pip'
 }
 
-async function installUnirtm(
+async function installUnigo(
   method: InstallMethod,
   version: string
 ): Promise<boolean> {
@@ -277,11 +259,11 @@ async function installUnirtm(
 // ─── npm Installation ─────────────────────────────────────────────────────────
 
 /**
- * Install unirtm via npm global install.
+ * Install unigo via npm global install.
  * Requires npm to be available in PATH.
  */
 async function installViaNpm(version: string): Promise<boolean> {
-  core.startGroup(`Installing unirtm@${version} via npm`)
+  core.startGroup(`Installing unigo@${version} via npm`)
   try {
     const pkg = version ? `${NPM_PACKAGE}@${version}` : NPM_PACKAGE
     const code = await exec.exec('npm', ['install', '-g', pkg])
@@ -310,12 +292,12 @@ async function installViaNpm(version: string): Promise<boolean> {
 // ─── pip Installation ─────────────────────────────────────────────────────────
 
 /**
- * Install unirtm via pip.
+ * Install unigo via pip.
  * NOTE: PyPI package is not yet available; this is a reserved implementation.
  * Falls back to GitHub Release download with a warning.
  */
 async function installViaPip(version: string): Promise<boolean> {
-  core.startGroup(`Installing unirtm@${version} via pip`)
+  core.startGroup(`Installing unigo@${version} via pip`)
   try {
     const pipCmd =
       (await io.which('pip3', false)) || (await io.which('pip', false))
@@ -326,9 +308,9 @@ async function installViaPip(version: string): Promise<boolean> {
 
     const args = ['install']
     if (version !== 'latest') {
-      args.push(`snowdreamtech-unirtm==${version}`)
+      args.push(`snowdreamtech-unigo==${version}`)
     } else {
-      args.push('snowdreamtech-unirtm')
+      args.push('snowdreamtech-unigo')
     }
 
     const res = await exec.getExecOutput(pipCmd, args, {
@@ -341,7 +323,7 @@ async function installViaPip(version: string): Promise<boolean> {
       return false
     }
 
-    core.info('✅ Successfully installed unirtm via pip')
+    core.info('✅ Successfully installed unigo via pip')
     return true
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
@@ -355,15 +337,15 @@ async function installViaPip(version: string): Promise<boolean> {
 // ─── GitHub Release Installation ─────────────────────────────────────────────
 
 /**
- * Download and install unirtm binary from GitHub Releases.
+ * Download and install unigo binary from GitHub Releases.
  * Supports github_proxy prefix and automatic retry.
  */
 async function installViaRelease(version: string): Promise<boolean> {
-  core.startGroup(`Installing unirtm@${version} via GitHub Release`)
+  core.startGroup(`Installing unigo@${version} via GitHub Release`)
   try {
     const targetStr = getTarget()
     const ext = process.platform === 'win32' ? '.zip' : '.tar.gz'
-    const assetName = `unirtm_${targetStr}${ext}`
+    const assetName = `unigo_${targetStr}${ext}`
     const githubProxy =
       core.getInput('github_proxy').trim() ||
       process.env.GITHUB_PROXY?.trim() ||
@@ -371,7 +353,7 @@ async function installViaRelease(version: string): Promise<boolean> {
 
     const rawUrl =
       version === 'latest'
-        ? `https://github.com/snowdreamtech/UniRTM/releases/latest/download/${assetName}`
+        ? `https://github.com/snowdreamtech/UniGo/releases/latest/download/${assetName}`
         : `${GITHUB_RELEASE_DOWNLOAD_BASE}/v${version}/${assetName}`
     const downloadUrl = githubProxy
       ? `${githubProxy.replace(/\/$/, '')}/${rawUrl}`
@@ -384,7 +366,7 @@ async function installViaRelease(version: string): Promise<boolean> {
     await fs.promises.mkdir(binDir, { recursive: true })
 
     const archivePath = path.join(os.tmpdir(), assetName)
-    const extractDir = path.join(os.tmpdir(), `unirtm-extract-${Date.now()}`)
+    const extractDir = path.join(os.tmpdir(), `unigo-extract-${Date.now()}`)
 
     // Download with retry
     await downloadWithRetry(downloadUrl, archivePath)
@@ -398,7 +380,7 @@ async function installViaRelease(version: string): Promise<boolean> {
     }
 
     // Find and move binary
-    const binaryName = process.platform === 'win32' ? 'unirtm.exe' : 'unirtm'
+    const binaryName = process.platform === 'win32' ? 'unigo.exe' : 'unigo'
     const binaryPath = await findFile(extractDir, binaryName)
     if (!binaryPath) {
       throw new Error(`Binary "${binaryName}" not found in extracted archive`)
@@ -410,7 +392,7 @@ async function installViaRelease(version: string): Promise<boolean> {
     }
 
     core.addPath(binDir)
-    core.info(`unirtm installed to ${destPath}`)
+    core.info(`unigo installed to ${destPath}`)
 
     // Cleanup temp files
     await fs.promises.rm(archivePath, { force: true })
@@ -480,11 +462,11 @@ async function findFile(
 // ─── go Installation ──────────────────────────────────────────────────────────
 
 /**
- * Install unirtm via `go install`.
+ * Install unigo via `go install`.
  * Requires go to be available in PATH.
  */
 async function installViaGo(version: string): Promise<boolean> {
-  core.startGroup(`Installing unirtm@${version} via go install`)
+  core.startGroup(`Installing unigo@${version} via go install`)
   try {
     const pkg =
       version && version !== 'latest'
@@ -511,12 +493,12 @@ async function installViaGo(version: string): Promise<boolean> {
 // ─── Verification ─────────────────────────────────────────────────────────────
 
 /**
- * Verify unirtm is accessible and return its version string.
+ * Verify unigo is accessible and return its version string.
  */
-async function verifyUnirtm(): Promise<string> {
-  core.startGroup('Verifying unirtm installation')
+async function verifyUnigo(): Promise<string> {
+  core.startGroup('Verifying unigo installation')
   try {
-    const result = await exec.getExecOutput('unirtm', ['version'], {
+    const result = await exec.getExecOutput('unigo', ['version'], {
       silent: false,
       ignoreReturnCode: true
     })
@@ -529,41 +511,11 @@ async function verifyUnirtm(): Promise<string> {
   }
 }
 
-// ─── Run unirtm trust ─────────────────────────────────────────────────────────
-
-/**
- * Run `unirtm trust` to trust the configuration file.
- */
-async function runUnirtmTrust(): Promise<void> {
-  core.startGroup('Running: unirtm trust')
-  try {
-    await exec.exec('unirtm', ['trust'])
-  } finally {
-    core.endGroup()
-  }
-}
-
-// ─── Run unirtm install ───────────────────────────────────────────────────────
-
-/**
- * Run `unirtm install [install_args]` to install tools defined in config.
- */
-async function runUnirtmInstall(): Promise<void> {
-  const installArgs = core.getInput('install_args').trim()
-  const args = ['install', ...installArgs.split(/\s+/).filter(Boolean)]
-  core.startGroup(`Running: unirtm ${args.join(' ')}`)
-  try {
-    await exec.exec('unirtm', args)
-  } finally {
-    core.endGroup()
-  }
-}
-
 /**
  * Return platform-specific paths that should be cached.
- * UniRTM uses XDG Base Directory convention:
- *   Linux & macOS: ~/.local/share/unirtm
- *   Windows:       %LOCALAPPDATA%\unirtm
+ * UniGo uses XDG Base Directory convention:
+ *   Linux & macOS: ~/.local/share/unigo
+ *   Windows:       %LOCALAPPDATA%\unigo
  */
 function getCachePaths(): string[] {
   const home = os.homedir()
@@ -571,21 +523,21 @@ function getCachePaths(): string[] {
     return [
       path.join(
         process.env.LOCALAPPDATA ?? path.join(home, 'AppData', 'Local'),
-        'unirtm'
+        'unigo'
       )
     ]
   }
-  return [path.join(home, '.local', 'share', 'unirtm')]
+  return [path.join(home, '.local', 'share', 'unigo')]
 }
 
 /**
- * Restore the unirtm installation from cache.
+ * Restore the unigo installation from cache.
  * Supports primary key + OS-prefixed restore-keys for better hit rates.
  */
-async function restoreUnirtmCache(
+async function restoreUnigoCache(
   version: string
 ): Promise<{ primaryKey: string; hit: boolean }> {
-  core.startGroup('Restoring unirtm cache')
+  core.startGroup('Restoring unigo cache')
 
   const cacheKeyTemplate =
     core.getInput('cache_key') || DEFAULT_CACHE_KEY_TEMPLATE
@@ -594,8 +546,8 @@ async function restoreUnirtmCache(
   // Fallback restore-keys (OS-scoped, progressively broader)
   const runnerOs = process.env.RUNNER_OS ?? process.platform
   const restoreKeys = [
-    `${core.getInput('cache_key_prefix') || 'setup-unirtm-v1'}-${runnerOs.toLowerCase()}-unirtm-`,
-    `${core.getInput('cache_key_prefix') || 'setup-unirtm-v1'}-${runnerOs.toLowerCase()}-`
+    `${core.getInput('cache_key_prefix') || 'setup-unigo-v1'}-${runnerOs.toLowerCase()}-unigo-`,
+    `${core.getInput('cache_key_prefix') || 'setup-unigo-v1'}-${runnerOs.toLowerCase()}-`
   ]
 
   const cachePaths = getCachePaths()
@@ -618,11 +570,11 @@ async function restoreUnirtmCache(
 }
 
 /**
- * Save the unirtm installation to cache.
+ * Save the unigo installation to cache.
  * Called from post-action (src/post.ts) after the job completes.
  */
-async function saveUnirtmCache(cacheKey: string): Promise<void> {
-  core.startGroup('Saving unirtm cache')
+async function saveUnigoCache(cacheKey: string): Promise<void> {
+  core.startGroup('Saving unigo cache')
   const cachePaths = getCachePaths()
 
   // Filter to paths that actually exist (non-existent paths cause cache errors)
@@ -644,7 +596,7 @@ async function saveUnirtmCache(cacheKey: string): Promise<void> {
 }
 
 // Export for use by post.ts
-export { saveUnirtmCache, getCachePaths }
+export { saveUnigoCache, getCachePaths }
 
 // ─── Cache Key Template ───────────────────────────────────────────────────────
 
@@ -652,36 +604,21 @@ async function processCacheKeyTemplate(
   template: string,
   version: string
 ): Promise<string> {
-  const installArgs = core.getInput('install_args')
-  const cacheKeyPrefix = core.getInput('cache_key_prefix') || 'setup-unirtm-v1'
-  const unirtmEnv = process.env.UNIRTM_ENV?.replace(/,/g, '-') ?? ''
+  const cacheKeyPrefix = core.getInput('cache_key_prefix') || 'setup-unigo-v1'
+  const unigoEnv = process.env.UNIGO_ENV?.replace(/,/g, '-') ?? ''
   const miseEnv = process.env.MISE_ENV?.replace(/,/g, '-') ?? ''
   const platform = `${getPlatformArch()}-${getRunnerImageId()}`
 
-  // Hash unirtm config files
-  const fileHash = await glob.hashFiles(UNIRTM_CONFIG_FILE_PATTERNS.join('\n'))
-
-  // Hash install args (sorted, flags excluded)
-  let installArgsHash = ''
-  if (installArgs) {
-    const tools = installArgs
-      .split(/\s+/)
-      .filter(a => !a.startsWith('-'))
-      .sort()
-      .join(' ')
-    if (tools) {
-      installArgsHash = crypto.createHash('sha256').update(tools).digest('hex')
-    }
-  }
+  // Hash unigo config files
+  const fileHash = await glob.hashFiles(UNIGO_CONFIG_FILE_PATTERNS.join('\n'))
 
   const baseData = {
     version,
     cache_key_prefix: cacheKeyPrefix,
     platform,
     file_hash: fileHash,
-    unirtm_env: unirtmEnv,
-    mise_env: miseEnv,
-    install_args_hash: installArgsHash
+    unigo_env: unigoEnv,
+    mise_env: miseEnv
   }
 
   // Compute default key first
@@ -761,7 +698,7 @@ function getRunnerImageId(): string {
 // ─── Install Dirs ─────────────────────────────────────────────────────────────
 
 /**
- * Return the directory where the unirtm binary should be placed.
+ * Return the directory where the unigo binary should be placed.
  * This is always ~/.local/bin (cross-platform).
  */
 function getInstallBinDir(): string {
