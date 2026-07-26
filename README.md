@@ -135,7 +135,7 @@ Supports `github_proxy` for mirror acceleration and retries (up to 3 attempts).
 ### `go`
 
 ```bash
-go install github.com/snowdreamtech/UniGo/cmd/unigo@v<version>
+go install github.com/snowdreamtech/unigo@v<version>
 ```
 
 ---
