@@ -1,9 +1,9 @@
-# setup-unirtm
+# setup-unigo
 
-[![CI](https://github.com/snowdreamtech/setup-unirtm/actions/workflows/ci.yml/badge.svg)](https://github.com/snowdreamtech/setup-unirtm/actions/workflows/ci.yml)
-[![Check dist/](https://github.com/snowdreamtech/setup-unirtm/actions/workflows/check-dist.yml/badge.svg)](https://github.com/snowdreamtech/setup-unirtm/actions/workflows/check-dist.yml)
+[![CI](https://github.com/snowdreamtech/setup-unigo/actions/workflows/ci.yml/badge.svg)](https://github.com/snowdreamtech/setup-unigo/actions/workflows/ci.yml)
+[![Check dist/](https://github.com/snowdreamtech/setup-unigo/actions/workflows/check-dist.yml/badge.svg)](https://github.com/snowdreamtech/setup-unigo/actions/workflows/check-dist.yml)
 
-> GitHub Action to install and configure [UniRTM](https://github.com/snowdreamtech/UniRTM) — the Uni Runtime and Tools Manager.
+> GitHub Action to install and configure [UniGo](https://github.com/snowdreamtech/UniGo) — the Uni Runtime and Tools Manager.
 
 ---
 
@@ -23,23 +23,23 @@
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
 ```
 
 ### Specify version
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
     with:
-      unirtm-version: '0.25.7'
+      unigo-version: '0.25.7'
 ```
 
 ### Force a specific install method
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
     with:
       install_method: npm # npm | pip | release | go | auto
 ```
@@ -48,7 +48,7 @@ steps:
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
     with:
       install_method: release
       github_proxy: 'https://ghproxy.com/'
@@ -59,9 +59,9 @@ steps:
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
     with:
-      unirtm-version: '0.25.7'
+      unigo-version: '0.25.7'
       install: true
       install_args: 'node python'
       cache: true
@@ -72,7 +72,7 @@ steps:
 
 ```yaml
 steps:
-  - uses: snowdreamtech/setup-unirtm@v0
+  - uses: snowdreamtech/setup-unigo@v0
     with:
       cache_key: '{{cache_key_prefix}}-{{platform}}-{{version}}'
 ```
@@ -83,16 +83,16 @@ steps:
 
 | Input              | Required | Default               | Description                                                               |
 | ------------------ | -------- | --------------------- | ------------------------------------------------------------------------- |
-| `unirtm-version`   | No       | `""` (latest)         | The unirtm version to install (e.g. `0.25.7`)                             |
-| `install`          | No       | `false`               | Run `unirtm install` after setup                                          |
-| `install_args`     | No       | `""`                  | Arguments passed to `unirtm install` (e.g. `"node python"`)               |
-| `trust`            | No       | `false`               | Run `unirtm trust` after setting up unirtm                                |
+| `unigo-version`    | No       | `""` (latest)         | The unigo version to install (e.g. `0.25.7`)                              |
+| `install`          | No       | `false`               | Run `unigo install` after setup                                           |
+| `install_args`     | No       | `""`                  | Arguments passed to `unigo install` (e.g. `"node python"`)                |
+| `trust`            | No       | `false`               | Run `unigo trust` after setting up unigo                                  |
 | `github_token`     | No       | `${{ github.token }}` | GitHub token for API auth and rate limit avoidance                        |
 | `github_proxy`     | No       | `""`                  | Proxy prefix for GitHub download URLs (also reads `GITHUB_PROXY` env var) |
 | `install_method`   | No       | `auto`                | Installation method: `auto` / `npm` / `pip` / `release` / `go`            |
-| `cache`            | No       | `true`                | Enable caching of the unirtm installation                                 |
+| `cache`            | No       | `true`                | Enable caching of the unigo installation                                  |
 | `cache_save`       | No       | `true`                | Save cache after installation                                             |
-| `cache_key_prefix` | No       | `setup-unirtm-v1`     | Cache key prefix (change to invalidate cache)                             |
+| `cache_key_prefix` | No       | `setup-unigo-v1`      | Cache key prefix (change to invalidate cache)                             |
 | `cache_key`        | No       | `""`                  | Override the full cache key (supports template variables)                 |
 
 ---
@@ -102,7 +102,7 @@ steps:
 | Output           | Description                                                   |
 | ---------------- | ------------------------------------------------------------- |
 | `cache-hit`      | `true` if the cache was restored                              |
-| `unirtm-version` | The installed unirtm version string                           |
+| `unigo-version`  | The installed unigo version string                            |
 | `install-method` | The method used for installation (`npm`/`pip`/`release`/`go`) |
 
 ---
@@ -123,24 +123,24 @@ Detects the best method based on available tools, in priority order:
 ### `npm`
 
 ```bash
-npm install -g @snowdreamtech/unirtm@<version>
+npm install -g @snowdreamtech/unigo@<version>
 ```
 
 ### `pip`
 
 ```bash
-pip install snowdreamtech-unirtm==<version>
+pip install snowdreamtech-unigo==<version>
 ```
 
 ### `release`
 
-Downloads the prebuilt binary from [GitHub Releases](https://github.com/snowdreamtech/UniRTM/releases).
+Downloads the prebuilt binary from [GitHub Releases](https://github.com/snowdreamtech/UniGo/releases).
 Supports `github_proxy` for mirror acceleration and retries (up to 3 attempts).
 
 ### `go`
 
 ```bash
-go install github.com/snowdreamtech/UniRTM/cmd/unirtm@v<version>
+go install github.com/snowdreamtech/UniGo/cmd/unigo@v<version>
 ```
 
 ---
@@ -149,16 +149,16 @@ go install github.com/snowdreamtech/UniRTM/cmd/unirtm@v<version>
 
 When using a custom `cache_key`, the following [Handlebars](https://handlebarsjs.com/) variables are available:
 
-| Variable                | Description                                                 |
-| ----------------------- | ----------------------------------------------------------- |
-| `{{version}}`           | The unirtm version (from the `unirtm-version` input)        |
-| `{{cache_key_prefix}}`  | The cache key prefix (from `cache_key_prefix` input)        |
-| `{{platform}}`          | Target platform + runner image (e.g. `linux-x64-ubuntu24`)  |
-| `{{file_hash}}`         | Hash of unirtm config files (`.unirtm.toml`, `unirtm.lock`) |
-| `{{unirtm_env}}`        | Value of `UNIRTM_ENV` environment variable                  |
-| `{{mise_env}}`          | Value of `MISE_ENV` environment variable                    |
-| `{{install_args_hash}}` | SHA256 hash of sorted tools from `install_args`             |
-| `{{default}}`           | The computed default cache key (useful for extending)       |
+| Variable                | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| `{{version}}`           | The unigo version (from the `unigo-version` input)         |
+| `{{cache_key_prefix}}`  | The cache key prefix (from `cache_key_prefix` input)       |
+| `{{platform}}`          | Target platform + runner image (e.g. `linux-x64-ubuntu24`) |
+| `{{file_hash}}`         | Hash of unigo config files (`.unigo.toml`, `unigo.lock`)   |
+| `{{unigo_env}}`         | Value of `UNIGO_ENV` environment variable                  |
+| `{{mise_env}}`          | Value of `MISE_ENV` environment variable                   |
+| `{{install_args_hash}}` | SHA256 hash of sorted tools from `install_args`            |
+| `{{default}}`           | The computed default cache key (useful for extending)      |
 
 **Conditional syntax:**
 
