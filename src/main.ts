@@ -15,8 +15,6 @@ const UNIGO_CONFIG_FILE_PATTERNS = [
   '**/unigo.toml',
   '**/unigo.lock',
   '**/.unigo.lock',
-  '**/.mise.toml',
-  '**/mise.toml',
   '**/.tool-versions'
 ]
 
@@ -24,7 +22,6 @@ const DEFAULT_CACHE_KEY_TEMPLATE =
   '{{cache_key_prefix}}-{{platform}}' +
   '{{#if version}}-{{version}}{{/if}}' +
   '{{#if unigo_env}}-{{unigo_env}}{{/if}}' +
-  '{{#if mise_env}}-{{mise_env}}{{/if}}' +
   '-{{#if file_hash}}{{file_hash}}{{else}}no-config{{/if}}'
 
 const GITHUB_RELEASES_API =
@@ -606,7 +603,6 @@ async function processCacheKeyTemplate(
 ): Promise<string> {
   const cacheKeyPrefix = core.getInput('cache_key_prefix') || 'setup-unigo-v1'
   const unigoEnv = process.env.UNIGO_ENV?.replace(/,/g, '-') ?? ''
-  const miseEnv = process.env.MISE_ENV?.replace(/,/g, '-') ?? ''
   const platform = `${getPlatformArch()}-${getRunnerImageId()}`
 
   // Hash unigo config files
@@ -617,8 +613,7 @@ async function processCacheKeyTemplate(
     cache_key_prefix: cacheKeyPrefix,
     platform,
     file_hash: fileHash,
-    unigo_env: unigoEnv,
-    mise_env: miseEnv
+    unigo_env: unigoEnv
   }
 
   // Compute default key first

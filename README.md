@@ -151,7 +151,6 @@ When using a custom `cache_key`, the following [Handlebars](https://handlebarsjs
 | `{{platform}}`         | Target platform + runner image (e.g. `linux-x64-ubuntu24`) |
 | `{{file_hash}}`        | Hash of unigo config files (`.unigo.toml`, `unigo.lock`)   |
 | `{{unigo_env}}`        | Value of `UNIGO_ENV` environment variable                  |
-| `{{mise_env}}`         | Value of `MISE_ENV` environment variable                   |
 | `{{default}}`          | The computed default cache key (useful for extending)      |
 
 **Conditional syntax:**
