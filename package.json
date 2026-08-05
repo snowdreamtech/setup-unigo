@@ -1,7 +1,7 @@
 {
   "name": "setup-unigo",
   "description": "GitHub Action to setup UniGo (Uni Runtime and Tools Manager)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Snowdream Tech",
   "private": true,
   "homepage": "https://github.com/snowdreamtech/setup-unigo",
