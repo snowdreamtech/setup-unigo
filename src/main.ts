@@ -111,6 +111,11 @@ export async function run(): Promise<void> {
     core.setOutput('unigo-version', installedVersion)
     core.info(`unigo ${installedVersion} is ready`)
 
+    // Inject shims into GITHUB_PATH
+    const shimsPath = getShimsPath()
+    core.addPath(shimsPath)
+    core.info(`Injected shims path: ${shimsPath}`)
+
     // Save cache (only on cache miss; post-action handles the actual save)
     if (cacheKey && core.getBooleanInput('cache_save')) {
       core.saveState('PRIMARY_KEY', cacheKey)
@@ -698,6 +703,31 @@ function getRunnerImageId(): string {
  */
 function getInstallBinDir(): string {
   return path.join(os.homedir(), '.local', 'bin')
+}
+
+/**
+ * Return the directory where unigo shims are placed.
+ */
+function getShimsPath(): string {
+  const home = os.homedir()
+  if (process.platform === 'win32') {
+    return path.join(
+      process.env.UNIGO_DATA_DIR ??
+        path.join(
+          process.env.LOCALAPPDATA ?? path.join(home, 'AppData', 'Local'),
+          'unigo'
+        ),
+      'shims'
+    )
+  }
+  return path.join(
+    process.env.UNIGO_DATA_DIR ??
+      path.join(
+        process.env.XDG_DATA_HOME ?? path.join(home, '.local', 'share'),
+        'unigo'
+      ),
+    'shims'
+  )
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
